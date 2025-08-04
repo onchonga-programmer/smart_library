@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - LibraryHub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #e6faf7 0%, #ffffff 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .signup-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .signup-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .signup-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #00d4aa, #33ddbf);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: white;
+            font-size: 2rem;
+        }
+        
+        .signup-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        
+        .signup-subtitle {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #00d4aa;
+            box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1);
+        }
+        
+        .password-strength {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+        }
+        
+        .strength-weak { color: #dc2626; }
+        .strength-medium { color: #d97706; }
+        .strength-strong { color: #059669; }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: start;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-top: 0.25rem;
+        }
+        
+        .checkbox-group label {
+            font-size: 0.875rem;
+            line-height: 1.5;
+            margin-bottom: 0;
+        }
+        
+        .signup-btn {
+            width: 100%;
+            padding: 0.875rem;
+            background-color: #00d4aa;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .signup-btn:hover {
+            background-color: #00c297;
+            transform: translateY(-1px);
+        }
+        
+        .signup-btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .error-message {
+            background-color: #fef2f2;
+            color: #dc2626;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #fecaca;
+            font-size: 0.875rem;
+        }
+        
+        .field-error {
+            color: #dc2626;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .links {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .links a {
+            color: #00d4aa;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .links a:hover {
+            text-decoration: underline;
+        }
+        
+        .divider {
+            margin: 0.5rem 0;
+            color: #6b7280;
+        }
+        
+        @media (max-width: 480px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            
+            .signup-container {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="signup-header">
+            <div class="signup-icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h1 class="signup-title">Create Account</h1>
+            <p class="signup-subtitle">Join our library community today</p>
+        </div>
+        
+        {% if form.non_field_errors %}
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ form.non_field_errors.0 }}
+            </div>
+        {% endif %}
+        
+        <form method="post" id="signupForm">
+            {% csrf_token %}
+            
+            <!-- Personal Information -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.first_name.id_for_label }}">First Name *</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <div class="field-error">{{ form.first_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.last_name.id_for_label }}">Last Name *</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <div class="field-error">{{ form.last_name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Contact Information -->
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">Email Address *</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="field-error">{{ form.email.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <!-- Account Information -->
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Username *</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="field-error">{{ form.username.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <!-- Password Fields -->
+            <div class="form-group">
+                <label for="{{ form.password1.id_for_label }}">Password *</label>
+                {{ form.password1 }}
+                <div id="passwordStrength" class="password-strength"></div>
+                {% if form.password1.errors %}
+                    <div class="field-error">{{ form.password1.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.password2.id_for_label }}">Confirm Password *</label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                    <div class="field-error">{{ form.password2.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <!-- Terms and Conditions -->
+            <div class="checkbox-group">
+                <input type="checkbox" id="terms" name="terms" required>
+                <label for="terms">
+                    I agree to the <a href="#" target="_blank">Terms of Service</a> and 
+                    <a href="#" target="_blank">Privacy Policy</a>
+                </label>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="newsletter" name="newsletter">
+                <label for="newsletter">
+                    Send me updates about new books and library events
+                </label>
+            </div>
+            
+            <button type="submit" class="signup-btn" id="submitBtn">
+                <i class="fas fa-user-plus"></i>
+                Create Account
+            </button>
+        </form>
+        
+        <div class="links">
+            <span>Already have an account?</span>
+            <div class="divider"></div>
+            <a href="{% url 'login' %}">
+                <i class="fas fa-sign-in-alt"></i>
+                Sign In
+            </a>
+            <span class="divider">•</span>
+            <a href="{% url 'books:home' %}">
+                <i class="fas fa-home"></i>
+                Back to Library
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Password strength checker
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordField = document.getElementById('{{ form.password1.id_for_label }}');
+            const strengthDiv = document.getElementById('passwordStrength');
+            const submitBtn = document.getElementById('submitBtn');
+            const form = document.getElementById('signupForm');
+            
+            if (passwordField) {
+                passwordField.addEventListener('input', function() {
+                    const password = this.value;
+                    const strength = checkPasswordStrength(password);
+                    
+                    strengthDiv.textContent = strength.text;
+                    strengthDiv.className = `password-strength ${strength.class}`;
+                });
+            }
+            
+            // Form submission handling
+            form.addEventListener('submit', function(e) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+            });
+            
+            function checkPasswordStrength(password) {
+                if (password.length < 6) {
+                    return { text: 'Password too short', class: 'strength-weak' };
+                }
+                
+                let score = 0;
+                
+                // Length check
+                if (password.length >= 8) score++;
+                
+                // Character variety checks
+                if (/[a-z]/.test(password)) score++;
+                if (/[A-Z]/.test(password)) score++;
+                if (/[0-9]/.test(password)) score++;
+                if (/[^A-Za-z0-9]/.test(password)) score++;
+                
+                if (score < 3) {
+                    return { text: 'Weak password', class: 'strength-weak' };
+                } else if (score < 5) {
+                    return { text: 'Medium strength', class: 'strength-medium' };
+                } else {
+                    return { text: 'Strong password', class: 'strength-strong' };
+                }
+            }
+        });
+    </script>
+</body>
+</html>

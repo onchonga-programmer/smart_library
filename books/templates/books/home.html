@@ -1,0 +1,736 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - LibraryHub{% endblock %}
+
+{% block content %}
+<!-- Hero Section with Search -->
+<section class="hero-section">
+    <div class="hero-container">
+        <div class="hero-content">
+            <h1 class="hero-title">Discover Your Next Great Read</h1>
+            <p class="hero-subtitle">Explore thousands of books, audiobooks, and digital resources</p>
+            
+            <!-- Search Bar -->
+            <div class="search-container">
+                <form class="search-form" method="GET" action="{% url 'books:search' %}">
+                    <div class="search-input-group">
+                        <input type="text" 
+                               name="q" 
+                               class="search-input" 
+                               placeholder="Search books, authors, genres..." 
+                               value="{{ request.GET.q }}"
+                               autocomplete="off">
+                        <div class="search-suggestions" id="search-suggestions"></div>
+                    </div>
+                    <div class="search-filters">
+                        <select name="category" class="search-filter">
+                            <option value="">All Categories</option>
+                            <option value="fiction">Fiction</option>
+                            <option value="non-fiction">Non-Fiction</option>
+                            <option value="science">Science</option>
+                            <option value="history">History</option>
+                            <option value="mystery">Mystery</option>
+                            <option value="romance">Romance</option>
+                        </select>
+                        <select name="availability" class="search-filter">
+                            <option value="">All Books</option>
+                            <option value="available">Available Now</option>
+                            <option value="ebook">E-books</option>
+                            <option value="audiobook">Audiobooks</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i>
+                        Search
+                    </button>
+                </form>
+                <a href="{% url 'books:advanced_search' %}" class="advanced-search-link">
+                    <i class="fas fa-sliders-h"></i>
+                    Advanced Search
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Actions -->
+{% if user.is_authenticated %}
+<section class="quick-actions-section">
+    <div class="container">
+        <div class="quick-actions">
+            <div class="quick-action-card" onclick="openQuickBorrowModal()">
+                <div class="action-icon">
+                    <i class="fas fa-book-reader"></i>
+                </div>
+                <h3>Quick Borrow</h3>
+                <p>Scan or enter book ID</p>
+            </div>
+            <div class="quick-action-card" onclick="openQuickReturnModal()">
+                <div class="action-icon">
+                    <i class="fas fa-undo"></i>
+                </div>
+                <h3>Quick Return</h3>
+                <p>Return borrowed books</p>
+            </div>
+            <div class="quick-action-card" data-url="{% url 'books:wishlist' %}" onclick="navigateToUrl(this)">
+                <div class="action-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <h3>My Wishlist</h3>
+                <p>View saved books</p>
+            </div>
+            <div class="quick-action-card" data-url="{% url 'books:my_borrows' %}" onclick="navigateToUrl(this)">
+                <div class="action-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h3>Due Soon</h3>
+                <p>Check return dates</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Featured Books Section -->
+<section class="featured-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Featured Books</h2>
+            <a href="{% url 'books:featured_books' %}" class="view-all-btn">
+                View All <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        <div class="books-grid">
+            <!-- Sample Featured Books - Replace with dynamic content -->
+            <div class="book-card">
+                <div class="book-cover">
+                    <img src="{% static 'books/images/image1.jpeg' %}" alt="Book Cover">
+                    <div class="book-overlay">
+                        <button class="btn-overlay" onclick="viewBook(1)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-overlay" onclick="addToWishlist(1)">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <h3 class="book-title">The Great Gatsby</h3>
+                    <p class="book-author">F. Scott Fitzgerald</p>
+                    <div class="book-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="rating-text">4.5 (234 reviews)</span>
+                    </div>
+                    <div class="book-status available">
+                        <i class="fas fa-check-circle"></i>
+                        Available
+                    </div>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <div class="book-cover">
+                    <img src="{% static 'books/images/image2.jpeg' %}" alt="Book Cover">
+                    <div class="book-overlay">
+                        <button class="btn-overlay" onclick="viewBook(2)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-overlay" onclick="addToWishlist(2)">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <h3 class="book-title">To Kill a Mockingbird</h3>
+                    <p class="book-author">Harper Lee</p>
+                    <div class="book-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="rating-text">4.8 (456 reviews)</span>
+                    </div>
+                    <div class="book-status borrowed">
+                        <i class="fas fa-clock"></i>
+                        Due Jan 15
+                    </div>
+                </div>
+            </div>
+
+            <!-- Repeat for more books... -->
+            <div class="book-card">
+                <div class="book-cover">
+                    <img src="{% static 'books/images/image3.jpeg' %}" alt="Book Cover">
+                    <div class="book-overlay">
+                        <button class="btn-overlay" onclick="viewBook(3)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-overlay" onclick="addToWishlist(3)">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <h3 class="book-title">1984</h3>
+                    <p class="book-author">George Orwell</p>
+                    <div class="book-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="rating-text">4.7 (789 reviews)</span>
+                    </div>
+                    <div class="book-status available">
+                        <i class="fas fa-check-circle"></i>
+                        Available
+                    </div>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <div class="book-cover">
+                    <img src="{% static 'books/images/image4.jpeg' %}" alt="Book Cover">
+                    <div class="book-overlay">
+                        <button class="btn-overlay" onclick="viewBook(4)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-overlay" onclick="addToWishlist(4)">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <h3 class="book-title">Pride and Prejudice</h3>
+                    <p class="book-author">Jane Austen</p>
+                    <div class="book-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                        <span class="rating-text">4.2 (345 reviews)</span>
+                    </div>
+                    <div class="book-status reserved">
+                        <i class="fas fa-bookmark"></i>
+                        Reserved
+                    </div>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <div class="book-cover">
+                    <img src="{% static 'books/images/image5.jpeg' %}" alt="Book Cover">
+                    <div class="book-overlay">
+                        <button class="btn-overlay" onclick="viewBook(5)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-overlay" onclick="addToWishlist(5)">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <h3 class="book-title">The Catcher in the Rye</h3>
+                    <p class="book-author">J.D. Salinger</p>
+                    <div class="book-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                        <span class="rating-text">4.0 (567 reviews)</span>
+                    </div>
+                    <div class="book-status available">
+                        <i class="fas fa-check-circle"></i>
+                        Available
+                    </div>
+                </div>
+            </div>
+
+            <div class="book-card">
+                <div class="book-cover">
+                    <img src="{% static 'books/images/image6.jpeg' %}" alt="Book Cover">
+                    <div class="book-overlay">
+                        <button class="btn-overlay" onclick="viewBook(6)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-overlay" onclick="addToWishlist(6)">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <h3 class="book-title">Lord of the Flies</h3>
+                    <p class="book-author">William Golding</p>
+                    <div class="book-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="rating-text">4.3 (289 reviews)</span>
+                    </div>
+                    <div class="book-status available">
+                        <i class="fas fa-check-circle"></i>
+                        Available
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recommended Books Section (for authenticated users) -->
+{% if user.is_authenticated %}
+<section class="recommendations-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-magic"></i>
+                Recommended for You
+            </h2>
+            <p class="section-subtitle">Based on your reading history and preferences</p>
+        </div>
+        <div class="books-grid">
+            <!-- Sample Recommended Books - Replace with ML recommendations -->
+            <div class="book-card recommended">
+                <div class="recommendation-badge">
+                    <i class="fas fa-star"></i>
+                    Recommended
+                </div>
+                <div class="book-cover">
+                    <img src="{% static 'books/images/placeholder-book.jpg' %}" alt="Book Cover">
+                    <div class="book-overlay">
+                        <button class="btn-overlay" onclick="viewBook(7)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-overlay" onclick="addToWishlist(7)">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <h3 class="book-title">Dune</h3>
+                    <p class="book-author">Frank Herbert</p>
+                    <div class="book-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="rating-text">4.9 (1.2k reviews)</span>
+                    </div>
+                    <div class="book-status available">
+                        <i class="fas fa-check-circle"></i>
+                        Available
+                    </div>
+                    <div class="recommendation-reason">
+                        <i class="fas fa-info-circle"></i>
+                        Because you liked "Foundation"
+                    </div>
+                </div>
+            </div>
+
+            <!-- Repeat for more recommended books -->
+            <div class="book-card recommended">
+                <div class="recommendation-badge">
+                    <i class="fas fa-star"></i>
+                    Recommended
+                </div>
+                <div class="book-cover">
+                    <img src="{% static 'books/images/placeholder-book.jpg' %}" alt="Book Cover">
+                    <div class="book-overlay">
+                        <button class="btn-overlay" onclick="viewBook(8)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-overlay" onclick="addToWishlist(8)">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <h3 class="book-title">The Martian</h3>
+                    <p class="book-author">Andy Weir</p>
+                    <div class="book-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="rating-text">4.6 (890 reviews)</span>
+                    </div>
+                    <div class="book-status ebook">
+                        <i class="fas fa-tablet-alt"></i>
+                        E-book Available
+                    </div>
+                    <div class="recommendation-reason">
+                        <i class="fas fa-info-circle"></i>
+                        Popular in Science Fiction
+                    </div>
+                </div>
+            </div>
+
+            <!-- Continue with 4 more recommended books following the same pattern -->
+            <div class="book-card recommended">
+                <div class="recommendation-badge">
+                    <i class="fas fa-star"></i>
+                    Recommended
+                </div>
+                <div class="book-cover">
+                    <img src="{% static 'books/images/placeholder-book.jpg' %}" alt="Book Cover">
+                    <div class="book-overlay">
+                        <button class="btn-overlay" onclick="viewBook(9)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-overlay" onclick="addToWishlist(9)">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <h3 class="book-title">Neuromancer</h3>
+                    <p class="book-author">William Gibson</p>
+                    <div class="book-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                        <span class="rating-text">4.1 (567 reviews)</span>
+                    </div>
+                    <div class="book-status audiobook">
+                        <i class="fas fa-headphones"></i>
+                        Audiobook Available
+                    </div>
+                    <div class="recommendation-reason">
+                        <i class="fas fa-info-circle"></i>
+                        Similar to your favorites
+                    </div>
+                </div>
+            </div>
+
+            <div class="book-card recommended">
+                <div class="recommendation-badge">
+                    <i class="fas fa-star"></i>
+                    Recommended
+                </div>
+                <div class="book-cover">
+                    <img src="{% static 'books/images/placeholder-book.jpg' %}" alt="Book Cover">
+                    <div class="book-overlay">
+                        <button class="btn-overlay" onclick="viewBook(10)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-overlay" onclick="addToWishlist(10)">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <h3 class="book-title">Foundation</h3>
+                    <p class="book-author">Isaac Asimov</p>
+                    <div class="book-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <span class="rating-text">4.8 (1.5k reviews)</span>
+                    </div>
+                    <div class="book-status available">
+                        <i class="fas fa-check-circle"></i>
+                        Available
+                    </div>
+                    <div class="recommendation-reason">
+                        <i class="fas fa-info-circle"></i>
+                        Trending in your genres
+                    </div>
+                </div>
+            </div>
+
+            <div class="book-card recommended">
+                <div class="recommendation-badge">
+                    <i class="fas fa-star"></i>
+                    Recommended
+                </div>
+                <div class="book-cover">
+                    <img src="{% static 'books/images/placeholder-book.jpg' %}" alt="Book Cover">
+                    <div class="book-overlay">
+                        <button class="btn-overlay" onclick="viewBook(11)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-overlay" onclick="addToWishlist(11)">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <h3 class="book-title">Ender's Game</h3>
+                    <p class="book-author">Orson Scott Card</p>
+                    <div class="book-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="rating-text">4.4 (923 reviews)</span>
+                    </div>
+                    <div class="book-status available">
+                        <i class="fas fa-check-circle"></i>
+                        Available
+                    </div>
+                    <div class="recommendation-reason">
+                        <i class="fas fa-info-circle"></i>
+                        Highly rated by similar users
+                    </div>
+                </div>
+            </div>
+
+            <div class="book-card recommended">
+                <div class="recommendation-badge">
+                    <i class="fas fa-star"></i>
+                    Recommended
+                </div>
+                <div class="book-cover">
+                    <img src="{% static 'books/images/placeholder-book.jpg' %}" alt="Book Cover">
+                    <div class="book-overlay">
+                        <button class="btn-overlay" onclick="viewBook(12)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-overlay" onclick="addToWishlist(12)">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <h3 class="book-title">The Left Hand of Darkness</h3>
+                    <p class="book-author">Ursula K. Le Guin</p>
+                    <div class="book-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                        <span class="rating-text">4.0 (678 reviews)</span>
+                    </div>
+                    <div class="book-status available">
+                        <i class="fas fa-check-circle"></i>
+                        Available
+                    </div>
+                    <div class="recommendation-reason">
+                        <i class="fas fa-info-circle"></i>
+                        Award-winning in your genre
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Quick Browse Categories -->
+<section class="categories-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Browse by Category</h2>
+            <a href="{% url 'books:category_list' %}" class="view-all-btn">
+                View All Categories <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        <div class="categories-grid">
+            <a href="{% url 'books:fiction_books' %}" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-feather-alt"></i>
+                </div>
+                <h3>Fiction</h3>
+                <p>1,234 books</p>
+            </a>
+            <a href="{% url 'books:science_books' %}" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-flask"></i>
+                </div>
+                <h3>Science</h3>
+                <p>567 books</p>
+            </a>
+            <a href="{% url 'books:mystery_books' %}" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3>Mystery</h3>
+                <p>432 books</p>
+            </a>
+            <a href="{% url 'books:romance_books' %}" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <h3>Romance</h3>
+                <p>789 books</p>
+            </a>
+            <a href="{% url 'books:fantasy_books' %}" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-dragon"></i>
+                </div>
+                <h3>Fantasy</h3>
+                <p>345 books</p>
+            </a>
+            <a href="{% url 'books:history_books' %}" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-landmark"></i>
+                </div>
+                <h3>History</h3>
+                <p>678 books</p>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">15,847</h3>
+                    <p class="stat-label">Books Available</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">3,421</h3>
+                    <p class="stat-label">Active Members</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-book-reader"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">8,923</h3>
+                    <p class="stat-label">Books Borrowed</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-number">4.8</h3>
+                    <p class="stat-label">Average Rating</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Borrow Modal -->
+<div class="modal" id="quickBorrowModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-book-reader"></i> Quick Borrow</h3>
+            <button class="modal-close" onclick="closeModal('quickBorrowModal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="quickBorrowForm">
+                <div class="form-group">
+                    <label for="bookId">Book ID or Barcode</label>
+                    <input type="text" id="bookId" name="bookId" placeholder="Enter book ID or scan barcode" required>
+                </div>
+                <div class="form-group">
+                    <label for="borrowDuration">Borrow Duration</label>
+                    <select id="borrowDuration" name="borrowDuration">
+                        <option value="7">1 Week</option>
+                        <option value="14" selected>2 Weeks</option>
+                        <option value="21">3 Weeks</option>
+                        <option value="30">1 Month</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('quickBorrowModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-book-reader"></i>
+                        Borrow Book
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Return Modal -->
+<div class="modal" id="quickReturnModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-undo"></i> Quick Return</h3>
+            <button class="modal-close" onclick="closeModal('quickReturnModal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="quickReturnForm">
+                <div class="form-group">
+                    <label for="returnBookId">Book ID or Barcode</label>
+                    <input type="text" id="returnBookId" name="returnBookId" placeholder="Enter book ID or scan barcode" required>
+                </div>
+                <div class="form-group">
+                    <label for="condition">Book Condition</label>
+                    <select id="condition" name="condition">
+                        <option value="excellent">Excellent</option>
+                        <option value="good" selected>Good</option>
+                        <option value="fair">Fair</option>
+                        <option value="damaged">Damaged</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="notes">Notes (Optional)</label>
+                    <textarea id="notes" name="notes" placeholder="Any additional notes..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('quickReturnModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-undo"></i>
+                        Return Book
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

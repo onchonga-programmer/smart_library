@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Library Management System{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'books/css/style.css' %}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <!-- Logo/Brand -->
+            <div class="nav-brand">
+                <a href="{% url 'books:home' %}" class="brand-link">
+                    <i class="fas fa-book-open"></i>
+                    <span>LibraryHub</span>
+                </a>
+            </div>
+
+            <!-- Mobile Menu Toggle -->
+            <div class="mobile-toggle" id="mobile-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <!-- Navigation Links -->
+            <div class="nav-menu" id="nav-menu">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="{% url 'books:dashboard' %}" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'books:book_list' %}" class="nav-link">
+                            <i class="fas fa-books"></i>
+                            <span>Books</span>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a href="{% url 'books:category_list' %}" class="nav-link dropdown-toggle">
+                            <i class="fas fa-tags"></i>
+                            <span>Genres</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a href="{% url 'books:fiction_books' %}" class="dropdown-item">Fiction</a>
+                            <a href="{% url 'books:non_fiction_books' %}" class="dropdown-item">Non-Fiction</a>
+                            <a href="{% url 'books:science_books' %}" class="dropdown-item">Science</a>
+                            <a href="{% url 'books:mystery_books' %}" class="dropdown-item">Mystery</a>
+                            <a href="{% url 'books:romance_books' %}" class="dropdown-item">Romance</a>
+                            <a href="{% url 'books:fantasy_books' %}" class="dropdown-item">Fantasy</a>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'books:reading_lists' %}" class="nav-link">
+                            <i class="fas fa-list"></i>
+                            <span>Reading Lists</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'books:notifications' %}" class="nav-link">
+                            <i class="fas fa-bell"></i>
+                            <span>Notifications</span>
+                            <span class="notification-badge" id="notification-count">3</span>
+                        </a>
+                    </li>
+                    
+                    
+                </ul>
+
+                <!-- User Menu -->
+                <div class="user-menu">
+                    {% if user.is_authenticated %}
+                        <div class="user-dropdown">
+                            <button class="user-btn" id="user-menu-btn">
+                                <i class="fas fa-user-circle"></i>
+                                <span>{{ user.first_name|default:user.username }}</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="user-dropdown-menu" id="user-dropdown-menu">
+                                <a href="{% url 'books:user_profile' %}" class="dropdown-item">
+                                    <i class="fas fa-user"></i>
+                                    Profile
+                                </a>
+                                <a href="{% url 'books:wishlist' %}" class="dropdown-item">
+                                    <i class="fas fa-heart"></i>
+                                    Wishlist
+                                </a>
+                                <a href="{% url 'books:my_books' %}" class="dropdown-item">
+                                    <i class="fas fa-book"></i>
+                                    My Books
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a href="{% url 'books:logout' %}" class="dropdown-item logout-link">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Logout
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="auth-links">
+                            <a href="{% url 'books:login' %}" class="nav-link login-link">
+                                <i class="fas fa-sign-in-alt"></i>
+                                Login
+                            </a>
+                            <a href="{% url 'books:signup' %}" class="nav-link signup-link">
+                                <i class="fas fa-user-plus"></i>
+                                Sign Up
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>LibraryHub</h3>
+                    <p>Your digital gateway to knowledge and discovery.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="{% url 'books:book_list' %}">Browse Books</a></li>
+                        <li><a href="{% url 'books:new_arrivals' %}">New Arrivals</a></li>
+                        <li><a href="{% url 'books:featured_books' %}">Featured</a></li>
+                        <li><a href="{% url 'books:bestsellers' %}">Bestsellers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Genres</h4>
+                    <ul>
+                        <li><a href="{% url 'books:fiction_books' %}">Fiction</a></li>
+                        <li><a href="{% url 'books:science_books' %}">Science</a></li>
+                        <li><a href="{% url 'books:mystery_books' %}">Mystery</a></li>
+                        <li><a href="{% url 'books:romance_books' %}">Romance</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Help & Support</h4>
+                    <ul>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Library Hours</a></li>
+                        <li><a href="#">Policies</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 LibraryHub. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner">
+            <i class="fas fa-book fa-spin"></i>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="{% static 'books/js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
