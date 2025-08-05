@@ -256,6 +256,30 @@ urlpatterns += [
 
 # Authentication URLs
 urlpatterns += [
-    path('registration/', include('django.contrib.auth.urls')),  # Django's built-in auth URLs
-    path('registration/signup/', views.signup_view, name='signup'),  # Signup URL should be at root level
+    path('accounts/', include('django.contrib.auth.urls')),  # Django's built-in auth URLs
+    path('signup/', views.signup_view, name='signup'),  # Signup URL at root level
 ]
+
+# Profile URLs
+urlpatterns += [
+    # Main profile views
+    path('profile/', views.profile_view, name='profile'),
+    path('profile/edit/', views.update_profile, name='profile_edit'),
+    path('profile/avatar/', views.update_avatar, name='profile_avatar'),
+    path('profile/password/', views.change_password, name='profile_password'),
+    path('profile/settings/', views.update_notification_settings, name='profile_settings'),
+    path('profile/delete/', views.delete_account, name='profile_delete'),
+    path('profile/export/', views.export_user_data, name='profile_export'),
+    
+    # Activity related
+    path('profile/activities/', views.get_user_activities, name='profile_activities'),
+    path('profile/history/', views.user_profile, name='profile_history'),
+    
+    # Reading related sections
+    path('profile/borrowed/', views.MyBorrowsView.as_view(), name='profile_borrowed'),
+    path('profile/wishlist/', views.WishlistView.as_view(), name='profile_wishlist'),
+    path('profile/reviews/', views.DashboardView.as_view(), {'section': 'reviews'}, name='profile_reviews'),
+    path('profile/reservations/', views.DashboardView.as_view(), {'section': 'reservations'}, name='profile_reservations'),
+]
+
+

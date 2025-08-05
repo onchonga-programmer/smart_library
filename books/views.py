@@ -8,6 +8,21 @@ from django.db.models import Q, Count, Avg, F
 from django.http import JsonResponse, HttpResponseRedirect
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib import messages
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.http import require_http_methods
+from django.core.paginator import Paginator
+from django.db.models import Q, Count, Sum
+from django.utils import timezone
+from django.conf import settings
+import json
+import csv
+import os
+from datetime import datetime, timedelta
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView,
     TemplateView, FormView
@@ -22,13 +37,15 @@ from django.db import models
 from .models import (
     Category, Author, Publisher, Book, BorrowRecord, 
     Reservation, Review, Wishlist, ReadingList, ReadingListItem,
-    BookHistory, Genre, BookCondition, Notification
+    BookHistory, Genre, BookCondition, Notification, UserProfile,
+    UserActivity
 )
 from .forms import (
     CategoryForm, AuthorForm, PublisherForm, BookForm, BorrowRecordForm,
     ReturnBookForm, RenewBookForm, ReservationForm, ReviewForm, WishlistForm,
     ReadingListForm, ReadingListItemForm, GenreForm, BookConditionForm,
-    BookSearchForm, NotificationForm, BulkBookActionForm, LibrarySettingsForm,CustomUserCreationForm
+    BookSearchForm, NotificationForm, BulkBookActionForm, LibrarySettingsForm,
+    CustomUserCreationForm, ProfileForm
 )
 
 
@@ -1054,7 +1071,7 @@ def user_profile(request):
         }
     }
     
-    return render(request, 'books/user_profile.html', context)
+    return render(request, 'books/user/profile.html', context)
 
 
 # ==================== EXPORT VIEWS ====================
@@ -1354,11 +1371,13 @@ from django.views.generic import ListView
 @method_decorator(login_required, name='dispatch')
 class WishlistView(ListView):
     template_name = 'books/wishlist.html'
-    context_object_name = 'wishlist_books'
+    context_object_name = 'wishlist_items'
     
     def get_queryset(self):
-        # Return user's wishlist books
-        return self.request.user.wishlist.all()
+        # Return user's wishlist items with related books
+        return Wishlist.objects.filter(
+            user=self.request.user
+        ).select_related('book').order_by('priority', '-added_date')
 
 @method_decorator(login_required, name='dispatch')
 class MyBorrowsView(ListView):
@@ -1366,19 +1385,365 @@ class MyBorrowsView(ListView):
     context_object_name = 'borrowed_books'
     
     def get_queryset(self):
-        # Return user's borrowed books
-        return self.request.user.borrowed_books.filter(returned=False)
- #create signup viewdef signup_view(request):
+        # Return user's active borrowed books
+        return BorrowRecord.objects.filter(
+            user=self.request.user,
+            status='active'
+        ).select_related('book')
 
 def signup_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
+            # Create profile for the user
+            profile = UserProfile.objects.create(user=user)
             login(request, user)  # Automatically log in the user after signup
-            return redirect('login')  # Redirect to login page or wherever you want
+            messages.success(request, 'Account created successfully! Please complete your profile.')
+            return redirect('books:user_profile')  # Redirect to profile page to complete setup
     else:
         form = CustomUserCreationForm()
     
-    return render(request, 'registration/signup.html', {'form': form})
+    return render(request, 'books/registration/signup.html', {'form': form})
 
+@login_required
+def profile_view(request):
+    """Display user profile page"""
+    user = request.user
+    profile = user.profile
+    
+    # Get user statistics
+    current_borrowed = user.borrowrecord_set.filter(return_date__isnull=True).count()
+    total_borrowed = user.borrowrecord_set.count()
+    total_returned = user.borrowrecord_set.filter(return_date__isnull=False).count()
+    wishlist_count = user.wishlist.count()
+    
+    # Get recent activities (last 10)
+    recent_activities = user.activities.select_related('book')[:10]
+    
+    # Get wishlist items (top 5 by priority)
+    wishlist_items = user.wishlist.select_related('book')[:5]
+    
+    # Get overdue books if any
+    overdue_books = user.borrowrecord_set.filter(
+        return_date__isnull=True,
+        due_date__lt=timezone.now().date()
+    ).select_related('book')
+    
+    context = {
+        'profile': profile,
+        'current_borrowed': current_borrowed,
+        'total_borrowed': total_borrowed,
+        'total_returned': total_returned,
+        'wishlist_count': wishlist_count,
+        'recent_activities': recent_activities,
+        'wishlist_items': wishlist_items,
+        'overdue_books': overdue_books,
+        'total_fines': profile.current_fines,
+    }
+    
+    return render(request, 'profile.html', context)
+
+
+@login_required
+@require_http_methods(["POST"])
+def update_profile(request):
+    """Update user profile information"""
+    user = request.user
+    profile = user.profile
+    
+    try:
+        # Update User model fields
+        user.first_name = request.POST.get('first_name', user.first_name)
+        user.last_name = request.POST.get('last_name', user.last_name)
+        user.email = request.POST.get('email', user.email)
+        user.save()
+        
+        # Update UserProfile fields
+        profile.phone = request.POST.get('phone', profile.phone)
+        profile.address = request.POST.get('address', profile.address)
+        
+        if profile.user_type == 'student':
+            profile.student_id = request.POST.get('student_id', profile.student_id)
+        else:
+            profile.employee_id = request.POST.get('employee_id', profile.employee_id)
+        
+        profile.department = request.POST.get('department', profile.department)
+        profile.save()
+        
+        # Log activity
+        UserActivity.log_activity(
+            user=user,
+            activity_type='profile_update',
+            description='Profile information updated'
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Profile updated successfully!'
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error updating profile: {str(e)}'
+        }, status=400)
+
+
+@login_required
+@require_http_methods(["POST"])
+def update_avatar(request):
+    """Update user profile avatar"""
+    if 'avatar' not in request.FILES:
+        return JsonResponse({
+            'success': False,
+            'message': 'No image file provided'
+        }, status=400)
+    
+    try:
+        profile = request.user.profile
+        
+        # Delete old avatar if it's not the default
+        if profile.avatar and profile.avatar.name != 'avatars/default.png':
+            if os.path.isfile(profile.avatar.path):
+                os.remove(profile.avatar.path)
+        
+        profile.avatar = request.FILES['avatar']
+        profile.save()
+        
+        # Log activity
+        UserActivity.log_activity(
+            user=request.user,
+            activity_type='profile_update',
+            description='Profile picture updated'
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Profile picture updated successfully!',
+            'avatar_url': profile.avatar.url
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error updating avatar: {str(e)}'
+        }, status=400)
+
+
+@login_required
+@require_http_methods(["POST"])
+def change_password(request):
+    """Change user password"""
+    form = PasswordChangeForm(request.user, request.POST)
+    
+    if form.is_valid():
+        user = form.save()
+        update_session_auth_hash(request, user)  # Keep user logged in
+        
+        # Log activity
+        UserActivity.log_activity(
+            user=user,
+            activity_type='password_change',
+            description='Password changed successfully'
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Password changed successfully!'
+        })
+    else:
+        errors = []
+        for field, field_errors in form.errors.items():
+            for error in field_errors:
+                errors.append(f"{field}: {error}")
+        
+        return JsonResponse({
+            'success': False,
+            'message': '; '.join(errors)
+        }, status=400)
+
+
+@login_required
+@require_http_methods(["POST"])
+def update_notification_settings(request):
+    """Update user notification preferences"""
+    try:
+        profile = request.user.profile
+        data = json.loads(request.body)
+        
+        profile.email_notifications = data.get('email_notifications', profile.email_notifications)
+        profile.sms_notifications = data.get('sms_notifications', profile.sms_notifications)
+        profile.public_profile = data.get('public_profile', profile.public_profile)
+        profile.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Notification settings updated!'
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error updating settings: {str(e)}'
+        }, status=400)
+
+
+@login_required
+def delete_account(request):
+    """Delete user account (soft delete - deactivate)"""
+    if request.method == 'POST':
+        confirmation = request.POST.get('confirmation')
+        
+        if confirmation != 'DELETE':
+            return JsonResponse({
+                'success': False,
+                'message': 'Please type "DELETE" to confirm account deletion'
+            }, status=400)
+        
+        try:
+            user = request.user
+            
+            # Check for active borrowed books
+            active_borrows = user.borrowrecord_set.filter(return_date__isnull=True).count()
+            if active_borrows > 0:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Cannot delete account. You have {active_borrows} books currently borrowed.'
+                }, status=400)
+            
+            # Check for unpaid fines
+            if user.profile.current_fines > 0:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Cannot delete account. You have ${user.profile.current_fines} in unpaid fines.'
+                }, status=400)
+            
+            # Soft delete - deactivate account
+            user.is_active = False
+            user.profile.is_active_member = False
+            user.save()
+            user.profile.save()
+            
+            # Log activity before deactivation
+            UserActivity.log_activity(
+                user=user,
+                activity_type='profile_update',
+                description='Account deactivated by user'
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Account has been deactivated successfully'
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Error deactivating account: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Invalid request method'
+    }, status=405)
+
+
+@login_required
+def export_user_data(request):
+    """Export user data as CSV"""
+    user = request.user
+    
+    # Create the HttpResponse object with CSV header
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="user_data_{user.username}_{datetime.now().strftime("%Y%m%d")}.csv"'
+    
+    writer = csv.writer(response)
+    
+    # User Information
+    writer.writerow(['USER INFORMATION'])
+    writer.writerow(['Field', 'Value'])
+    writer.writerow(['Username', user.username])
+    writer.writerow(['Full Name', user.get_full_name()])
+    writer.writerow(['Email', user.email])
+    writer.writerow(['Phone', user.profile.phone])
+    writer.writerow(['Address', user.profile.address])
+    writer.writerow(['User Type', user.profile.get_user_type_display()])
+    writer.writerow(['Library Card', user.profile.library_card_number])
+    writer.writerow(['Member Since', user.profile.membership_date.strftime('%Y-%m-%d')])
+    writer.writerow([])
+    
+    # Borrowing History
+    writer.writerow(['BORROWING HISTORY'])
+    writer.writerow(['Book Title', 'Borrow Date', 'Due Date', 'Return Date', 'Status'])
+    
+    borrow_records = user.borrowrecord_set.select_related('book').order_by('-borrow_date')
+    for record in borrow_records:
+        status = 'Returned' if record.return_date else ('Overdue' if record.due_date < timezone.now().date() else 'Active')
+        writer.writerow([
+            record.book.title,
+            record.borrow_date.strftime('%Y-%m-%d'),
+            record.due_date.strftime('%Y-%m-%d'),
+            record.return_date.strftime('%Y-%m-%d') if record.return_date else '',
+            status
+        ])
+    
+    writer.writerow([])
+    
+    # Wishlist
+    writer.writerow(['WISHLIST'])
+    writer.writerow(['Book Title', 'Author', 'Added Date', 'Priority'])
+    
+    wishlist_items = user.wishlist.select_related('book').order_by('-added_date')
+    for item in wishlist_items:
+        priority_map = {1: 'High', 2: 'Medium', 3: 'Low'}
+        writer.writerow([
+            item.book.title,
+            item.book.author,
+            item.added_date.strftime('%Y-%m-%d'),
+            priority_map.get(item.priority, 'Unknown')
+        ])
+    
+    writer.writerow([])
+    
+    # Recent Activities
+    writer.writerow(['RECENT ACTIVITIES'])
+    writer.writerow(['Activity', 'Description', 'Date'])
+    
+    activities = user.activities.order_by('-timestamp')[:50]  # Last 50 activities
+    for activity in activities:
+        writer.writerow([
+            activity.get_activity_type_display(),
+            activity.description,
+            activity.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+        ])
+    
+    return response
+
+
+@login_required
+def get_user_activities(request):
+    """Get paginated user activities for AJAX requests"""
+    page = request.GET.get('page', 1)
+    per_page = request.GET.get('per_page', 10)
+    
+    activities = request.user.activities.select_related('book').order_by('-timestamp')
+    paginator = Paginator(activities, per_page)
+    page_obj = paginator.get_page(page)
+    
+    activities_data = []
+    for activity in page_obj:
+        activities_data.append({
+            'type': activity.get_activity_type_display(),
+            'description': activity.description,
+            'timestamp': activity.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+            'book_title': activity.book.title if activity.book else None,
+        })
+    
+    return JsonResponse({
+        'activities': activities_data,
+        'has_next': page_obj.has_next(),
+        'has_previous': page_obj.has_previous(),
+        'current_page': page_obj.number,
+        'total_pages': paginator.num_pages,
+    })

@@ -6,7 +6,7 @@ from django.utils.text import slugify
 from .models import (
     Category, Author, Publisher, Book, BorrowRecord, 
     Reservation, Review, Wishlist, ReadingList, ReadingListItem,
-    BookHistory, Genre, BookCondition, Notification
+    BookHistory, Genre, BookCondition, Notification, UserProfile
 )
 
 
@@ -614,6 +614,83 @@ class CustomUserCreationForm(forms.ModelForm):
             user.save()
         
         return user   
+class ProfileForm(forms.ModelForm):
+    """Form for editing user profile"""
+    
+    class Meta:
+        model = UserProfile
+        fields = [
+            'phone', 'address', 'date_of_birth', 'user_type',
+            'student_id', 'employee_id', 'department',
+            'email_notifications', 'sms_notifications', 'public_profile',
+            'reading_goal', 'favorite_genres'
+        ]
+        widgets = {
+            'phone': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '+1234567890'
+            }),
+            'address': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Your address'
+            }),
+            'date_of_birth': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'user_type': forms.Select(attrs={'class': 'form-control'}),
+            'student_id': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Student ID (if applicable)'
+            }),
+            'employee_id': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Employee ID (if applicable)'
+            }),
+            'department': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Your department'
+            }),
+            'email_notifications': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'sms_notifications': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'public_profile': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'reading_goal': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1',
+                'placeholder': 'Books per year'
+            }),
+            'favorite_genres': forms.SelectMultiple(attrs={
+                'class': 'form-control',
+                'size': '5'
+            })
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make certain fields not required
+        optional_fields = ['student_id', 'employee_id', 'department', 'phone']
+        for field in optional_fields:
+            self.fields[field].required = False
+        
+        # Filter active genres only
+        self.fields['favorite_genres'].queryset = Genre.objects.filter(is_active=True)
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        user_type = cleaned_data.get('user_type')
+        student_id = cleaned_data.get('student_id')
+        employee_id = cleaned_data.get('employee_id')
+        
+        # Validate IDs based on user type
+        if user_type == 'student' and not student_id:
+            self.add_error('student_id', 'Student ID is required for student accounts.')
+        elif user_type == 'librarian' and not employee_id:
+            self.add_error('employee_id', 'Employee ID is required for librarian accounts.')
+        
+        return cleaned_data
+
+
 class ContactForm(forms.Form):
     """Form for user contact messages"""
     

@@ -13,6 +13,9 @@ from django.utils.text import slugify
 from PIL import Image
 import os
 import uuid
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.core.validators import RegexValidator
 
 
 class Category(models.Model):
@@ -375,19 +378,20 @@ class Review(models.Model):
 
 
 class Wishlist(models.Model):
-    """User wishlists"""
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishlist_items')
-    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='wishlist_items')
+    """User wishlist for books they want to read"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishlist')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
     added_date = models.DateTimeField(auto_now_add=True)
-    priority = models.PositiveIntegerField(default=1, help_text='1=High, 5=Low')
-    notes = models.TextField(blank=True)
-    
+    priority = models.IntegerField(default=1, help_text="1=High, 2=Medium, 3=Low")
+    notes = models.TextField(blank=True, max_length=500)
+
     class Meta:
+        db_table = 'wishlists'
+        unique_together = ('user', 'book')
         ordering = ['priority', '-added_date']
-        unique_together = ['user', 'book']
-    
+
     def __str__(self):
-        return f"{self.user.username}'s wishlist - {self.book.title}"
+        return f"{self.user.username} - {self.book.title}"
 
 
 class ReadingList(models.Model):
@@ -457,29 +461,6 @@ class BookHistory(models.Model):
         return f"{self.book.title} - {self.get_action_display()}"
     # Add these models to the end of your models.py file
 
-class Genre(models.Model):
-    """Book genres (can be multiple per book)"""
-    name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(max_length=100, unique=True, blank=True)
-    description = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        ordering = ['name']
-    
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
-    
-    def __str__(self):
-        return self.name
-    
-    def get_absolute_url(self):
-        return reverse('books:genre', kwargs={'slug': self.slug})
-
-
 class BookCondition(models.Model):
     """Track condition changes and maintenance of books"""
     book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='condition_records')
@@ -522,3 +503,221 @@ class Notification(models.Model):
         return f"{self.user.username} - {self.title}"
     #creating my borrows model to track user's borrowed books
 
+
+class UserProfile(models.Model):
+    """Extended user profile with library-specific information"""
+    
+    USER_TYPES = (
+        ('student', 'Student'),
+        ('librarian', 'Librarian'),
+    )
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    avatar = models.ImageField(upload_to='avatars/', default='avatars/default.png', blank=True)
+    phone = models.CharField(
+        max_length=15, 
+        blank=True, 
+        validators=[RegexValidator(r'^\+?1?\d{9,15}$', 'Enter a valid phone number.')]
+    )
+    address = models.TextField(blank=True, max_length=500)
+    date_of_birth = models.DateField(null=True, blank=True)
+    
+    # User type specific fields
+    user_type = models.CharField(max_length=10, choices=USER_TYPES, default='student')
+    student_id = models.CharField(max_length=20, blank=True, unique=True, null=True)
+    employee_id = models.CharField(max_length=20, blank=True, unique=True, null=True)
+    department = models.CharField(max_length=100, blank=True)
+    
+    # Notification preferences
+    email_notifications = models.BooleanField(default=True)
+    sms_notifications = models.BooleanField(default=False)
+    public_profile = models.BooleanField(default=True)
+    
+    # Library specific fields
+    membership_date = models.DateTimeField(auto_now_add=True)
+    library_card_number = models.CharField(max_length=20, unique=True, blank=True)
+    max_books_allowed = models.IntegerField(default=5)
+    current_fines = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    is_active_member = models.BooleanField(default=True)
+    
+    # Reading preferences
+    favorite_genres = models.ManyToManyField('Genre', blank=True)
+    reading_goal = models.IntegerField(default=12, help_text="Books per year")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'user_profiles'
+        verbose_name = 'User Profile'
+        verbose_name_plural = 'User Profiles'
+
+    def __str__(self):
+        return f"{self.user.get_full_name() or self.user.username} - {self.get_user_type_display()}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        
+        # Resize avatar image
+        if self.avatar:
+            img = Image.open(self.avatar.path)
+            if img.height > 300 or img.width > 300:
+                output_size = (300, 300)
+                img.thumbnail(output_size)
+                img.save(self.avatar.path)
+
+    @property
+    def total_books_borrowed(self):
+        """Get total number of books ever borrowed"""
+        return self.user.borrowrecord_set.count()
+
+    @property
+    def books_currently_borrowed(self):
+        """Get currently borrowed books count"""
+        return self.user.borrowrecord_set.filter(return_date__isnull=True).count()
+
+    @property
+    def total_fines_paid(self):
+        """Get total fines paid historically"""
+        return self.user.fine_set.aggregate(
+            total=models.Sum('amount_paid')
+        )['total'] or 0
+
+    @property
+    def overdue_books_count(self):
+        """Get count of overdue books"""
+        from django.utils import timezone
+        return self.user.borrowrecord_set.filter(
+            return_date__isnull=True,
+            due_date__lt=timezone.now().date()
+        ).count()
+
+    def generate_library_card_number(self):
+        """Generate unique library card number"""
+        if not self.library_card_number:
+            prefix = 'LIB'
+            year = self.membership_date.year
+            # Get the last card number for this year
+            last_profile = UserProfile.objects.filter(
+                library_card_number__startswith=f'{prefix}{year}'
+            ).order_by('library_card_number').last()
+            
+            if last_profile:
+                last_number = int(last_profile.library_card_number[-4:])
+                new_number = last_number + 1
+            else:
+                new_number = 1
+            
+            self.library_card_number = f'{prefix}{year}{new_number:04d}'
+            self.save()
+
+
+class Genre(models.Model):
+    """Book genres (can be multiple per book)"""
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True, blank=True)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'genres'
+        ordering = ['name']
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return self.name
+    
+    def get_absolute_url(self):
+        return reverse('books:genre', kwargs={'slug': self.slug})
+
+
+class UserActivity(models.Model):
+    """Track user activities for the profile dashboard"""
+    
+    ACTIVITY_TYPES = (
+        ('borrow', 'Book Borrowed'),
+        ('return', 'Book Returned'),
+        ('wishlist_add', 'Added to Wishlist'),
+        ('wishlist_remove', 'Removed from Wishlist'),
+        ('review', 'Book Reviewed'),
+        ('fine_paid', 'Fine Paid'),
+        ('profile_update', 'Profile Updated'),
+        ('password_change', 'Password Changed'),
+    )
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='activities')
+    activity_type = models.CharField(max_length=20, choices=ACTIVITY_TYPES)
+    description = models.CharField(max_length=255)
+    book = models.ForeignKey(
+        'Book', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        help_text="Related book if applicable"
+    )
+    metadata = models.JSONField(default=dict, blank=True)  # Store additional activity data
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'user_activities'
+        ordering = ['-timestamp']
+        verbose_name = 'User Activity'
+        verbose_name_plural = 'User Activities'
+
+    def __str__(self):
+        return f"{self.user.username} - {self.get_activity_type_display()}"
+
+    @classmethod
+    def log_activity(cls, user, activity_type, description, book=None, **metadata):
+        """Helper method to log user activities"""
+        return cls.objects.create(
+            user=user,
+            activity_type=activity_type,
+            description=description,
+            book=book,
+            metadata=metadata
+        )
+
+
+class BookReview(models.Model):
+    """User reviews and ratings for books"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='book_reviews')
+    book = models.ForeignKey('Book', on_delete=models.CASCADE, related_name='book_reviews')
+    rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)])  # 1-5 stars
+    review_text = models.TextField(blank=True, max_length=1000)
+    is_public = models.BooleanField(default=True)
+    helpful_count = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'book_reviews'
+        unique_together = ('user', 'book')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.book.title} ({self.rating}★)"
+
+
+# Signal handlers to automatically create/update profiles
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    """Create UserProfile when User is created"""
+    if created:
+        profile = UserProfile.objects.create(
+            user=instance,
+            user_type='librarian' if instance.is_staff else 'student'
+        )
+        profile.generate_library_card_number()
+
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    """Save UserProfile when User is saved"""
+    if hasattr(instance, 'profile'):
+        instance.profile.save()
