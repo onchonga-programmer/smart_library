@@ -90,6 +90,14 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         
+        # Prepare user data for JavaScript
+        context['user_data'] = {
+            'id': user.id,
+            'name': user.get_full_name() or user.username,
+            'role': 'librarian' if user.is_staff else 'student',
+            'avatar': user.profile.avatar.url if hasattr(user, 'profile') and user.profile.avatar else '/static/images/default-avatar.png'
+        }
+        
         context.update({
             'active_borrows': BorrowRecord.objects.filter(
                 user=user, status='active'

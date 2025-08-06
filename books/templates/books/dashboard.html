@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Library Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    
+    <style>
+        :root {
+            --mint-green: #00d4aa;
+            --mint-green-light: #00e6bb;
+            --mint-green-dark: #00c299;
+            --mint-green-bg: rgba(0, 212, 170, 0.1);
+            --white: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --info: #3b82f6;
+            --purple: #8b5cf6;
+            --pink: #ec4899;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--gray-50) 0%, var(--mint-green-bg) 100%);
+            min-height: 100vh;
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Header Section */
+        .dashboard-header {
+            background: var(--white);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--mint-green), var(--mint-green-light));
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .welcome-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--mint-green);
+        }
+
+        .welcome-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+
+        .welcome-subtitle {
+            color: var(--gray-600);
+            font-size: 0.875rem;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--mint-green);
+            color: var(--white);
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .quick-btn:hover {
+            background: var(--mint-green-dark);
+            transform: translateY(-2px);
+        }
+
+        .quick-btn.secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
+
+        .quick-btn.secondary:hover {
+            background: var(--gray-200);
+        }
+
+        /* Notification Center */
+        .notification-center {
+            position: relative;
+        }
+
+        .notification-btn {
+            position: relative;
+            background: var(--gray-100);
+            border: none;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            color: var(--gray-600);
+            transition: all 0.3s ease;
+        }
+
+        .notification-btn:hover {
+            background: var(--gray-200);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: var(--white);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 350px;
+            background: var(--white);
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notification-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+            font-weight: 600;
+        }
+
+        .notification-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-100);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .notification-item:hover {
+            background: var(--gray-50);
+        }
+
+        .notification-item.unread {
+            background: var(--mint-green-bg);
+        }
+
+        .notification-title {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .notification-message {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-bottom: 0.25rem;
+        }
+
+        .notification-time {
+            font-size: 0.75rem;
+            color: var(--gray-400);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .dashboard-card {
+            background: var(--white);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        /* Statistics Cards */
+        .stat-card {
+            text-align: center;
+            padding: 2rem 1.5rem;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            color: var(--white);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--gray-600);
+            font-size: 0.875rem;
+        }
+
+        .stat-change {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .stat-change.positive {
+            color: var(--success);
+        }
+
+        .stat-change.negative {
+            color: var(--danger);
+        }
+
+        /* Book List */
+        .book-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .book-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-100);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .book-item:hover {
+            background: var(--gray-50);
+        }
+
+        .book-item:last-child {
+            border-bottom: none;
+        }
+
+        .book-cover {
+            width: 50px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 0.25rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .book-info {
+            flex: 1;
+        }
+
+        .book-title {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        .book-author {
+            color: var(--gray-600);
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .book-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.75rem;
+        }
+
+        .due-date {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-weight: 500;
+        }
+
+        .due-date.due-soon {
+            background: var(--warning);
+            color: var(--white);
+        }
+
+        .due-date.overdue {
+            background: var(--danger);
+            color: var(--white);
+        }
+
+        .due-date.safe {
+            background: var(--success);
+            color: var(--white);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 250px;
+            padding: 1rem;
+        }
+
+        /* Calendar Widget */
+        .calendar-widget {
+            padding: 1rem;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .calendar-nav {
+            background: none;
+            border: none;
+            color: var(--gray-600);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-nav:hover {
+            background: var(--gray-100);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.25rem;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: var(--gray-100);
+        }
+
+        .calendar-day.today {
+            background: var(--mint-green);
+            color: var(--white);
+        }
+
+        .calendar-day.has-due {
+            background: var(--warning);
+            color: var(--white);
+        }
+
+        .calendar-day.has-overdue {
+            background: var(--danger);
+            color: var(--white);
+        }
+
+        /* Wishlist Drag & Drop */
+        .wishlist-container {
+            min-height: 200px;
+            padding: 1rem;
+        }
+
+        .wishlist-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: var(--gray-50);
+            border-radius: 0.5rem;
+            cursor: move;
+            transition: all 0.3s ease;
+        }
+
+        .wishlist-item:hover {
+            background: var(--mint-green-bg);
+            transform: translateX(4px);
+        }
+
+        .wishlist-item.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+
+        .drag-handle {
+            color: var(--gray-400);
+            cursor: grab;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        /* Activity Feed */
+        .activity-feed {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            color: var(--white);
+            flex-shrink: 0;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        .activity-description {
+            color: var(--gray-600);
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-time {
+            color: var(--gray-400);
+            font-size: 0.75rem;
+        }
+
+        /* Browse Section */
+        .browse-filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            padding: 0.5rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 0.25rem;
+            background: var(--white);
+            color: var(--gray-700);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--mint-green);
+        }
+
+        .book-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .book-card {
+            background: var(--white);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .book-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .book-card-cover {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+
+        .book-card-info {
+            padding: 0.75rem;
+        }
+
+        .book-card-title {
+            font-weight: 600;
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
+            color: var(--gray-900);
+        }
+
+        .book-card-author {
+            font-size: 0.7rem;
+            color: var(--gray-600);
+        }
+
+        /* Loading States */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: var(--gray-500);
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--gray-300);
+            border-top: 2px solid var(--mint-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 1rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .quick-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .notification-dropdown {
+                width: 300px;
+                right: -50px;
+            }
+        }
+
+        /* Role-specific styling */
+        .librarian-only {
+            display: none;
+        }
+
+        body.librarian .librarian-only {
+            display: block;
+        }
+
+        body.librarian .student-only {
+            display: none;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--mint-green);
+            color: var(--white);
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.error {
+            background: var(--danger);
+        }
+
+        .toast.warning {
+            background: var(--warning);
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+    </style>
+</head>
+<body class="student"> <!-- Change to 'librarian' for librarian view -->
+    <div class="dashboard-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="header-content">
+                <div class="welcome-section">
+                    <img src="/static/books/images/avatar.jpeg" alt="User Avatar" class="user-avatar" id="userAvatar">
+                    <div class="welcome-text">
+                        <h1>Good morning, <span id="userName">{{user.get_full_name|default:user.username}}</span>!</h1>
+                        <p class="welcome-subtitle">
+                            <span class="student-only">Ready to discover your next great read?</span>
+                            <span class="librarian-only">Let's manage the library efficiently today.</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <!-- Notification Center -->
+                    <div class="notification-center">
+                        <button class="notification-btn" onclick="toggleNotifications()">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge" id="notificationCount">5</span>
+                        </button>
+                        
+                        <div class="notification-dropdown" id="notificationDropdown">
+                            <div class="notification-header">
+                                <i class="fas fa-bell"></i> Notifications
+                            </div>
+                            <div id="notificationList">
+                                <!-- Notifications will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <button class="quick-btn" onclick="openQuickSearch()">
+                            <i class="fas fa-search"></i>
+                            Search Books
+                        </button>
+                        <span class="student-only">
+                            <button class="quick-btn secondary" onclick="openProfile()">
+                                <i class="fas fa-user"></i>
+                                Profile
+                            </button>
+                        </span>
+                        <span class="librarian-only">
+                            <button class="quick-btn" onclick="openReports()">
+                                <i class="fas fa-chart-bar"></i>
+                                Reports
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Statistics Card 1 - Books Borrowed -->
+            <div class="dashboard-card">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--mint-green);">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="stat-number" id="booksBorrowedCount">12</div>
+                    <div class="stat-label">
+                        <span class="student-only">Books Borrowed</span>
+                        <span class="librarian-only">Total Books</span>
+                    </div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> +2 this month
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Card 2 - Reading Goal -->
+            <div class="dashboard-card student-only">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--info);">
+                        <i class="fas fa-target"></i>
+                    </div>
+                    <div class="stat-number">8/12</div>
+                    <div class="stat-label">Reading Goal Progress</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-fire"></i> 5-day streak!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Card 2 - Active Members (Librarian) -->
+            <div class="dashboard-card librarian-only">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--info);">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number">245</div>
+                    <div class="stat-label">Active Members</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> +15 this week
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Card 3 - Due Soon -->
+            <div class="dashboard-card">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--warning);">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-number" id="dueSoonCount">3</div>
+                    <div class="stat-label">
+                        <span class="student-only">Due Soon</span>
+                        <span class="librarian-only">Books Due Today</span>
+                    </div>
+                    <div class="stat-change negative">
+                        <i class="fas fa-exclamation-triangle"></i> Needs attention
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Card 4 - Overdue -->
+            <div class="dashboard-card">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--danger);">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="stat-number" id="overdueCount">1</div>
+                    <div class="stat-label">
+                        <span class="student-only">Overdue Books</span>
+                        <span class="librarian-only">Total Overdue</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Second Row - Main Content -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+            <!-- Currently Borrowed Books -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-book-open"></i>
+                        <span class="student-only">My Borrowed Books</span>
+                        <span class="librarian-only">Recent Borrowings</span>
+                    </div>
+                    <button class="quick-btn secondary" onclick="viewAllBorrowed()">
+                        View All
+                    </button>
+                </div>
+                <div class="card-content" style="padding: 0;">
+                    <div class="book-list" id="borrowedBooksList">
+                        <!-- Books will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reading Statistics Chart -->
+            <div class="dashboard-card student-only">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-chart-line"></i>
+                        Reading Progress
+                    </div>
+                    <select class="filter-select" onchange="updateReadingChart(this.value)">
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="readingChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Library Statistics Chart (Librarian) -->
+            <div class="dashboard-card librarian-only">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-chart-bar"></i>
+                        Library Usage
+                    </div>
+                    <select class="filter-select" onchange="updateLibraryChart(this.value)">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="libraryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Third Row -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+            <!-- Calendar Widget -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-calendar-alt"></i>
+                        Due Dates Calendar
+                    </div>
+                </div>
+                <div class="calendar-widget">
+                    <div class="calendar-header">
+                        <button class="calendar-nav" onclick="previousMonth()">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span id="currentMonth">November 2024</span>
+                        <button class="calendar-nav" onclick="nextMonth()">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- Calendar will be generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wishlist Management -->
+            <div class="dashboard-card student-only">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-heart"></i>
+                        My Wishlist
+                    </div>
+                    <span style="background: var(--mint-green); color: var(--white); padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.875rem;">
+                        5 items
+                    </span>
+                </div>
+                <div class="wishlist-container" id="wishlistContainer">
+                    <!-- Wishlist items will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Popular Books (Librarian) -->
+            <div class="dashboard-card librarian-only">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-star"></i>
+                        Popular This Week
+                    </div>
+                </div>
+                <div class="card-content" style="padding: 0;">
+                    <div class="book-list" id="popularBooksList">
+                        <!-- Popular books will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activities -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-history"></i>
+                        Recent Activity
+                    </div>
+                    <button class="quick-btn secondary" onclick="viewAllActivities()">
+                        View All
+                    </button>
+                </div>
+                <div class="card-content" style="padding: 0;">
+                    <div class="activity-feed" id="activityFeed">
+                        <!-- Activities will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fourth Row - Browse & Recommendations -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+            <!-- Browse Books -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-compass"></i>
+                        Browse Books
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="browse-filters">
+                        <select class="filter-select" onchange="filterBooks('genre', this.value)">
+                            <option value="">All Genres</option>
+                            <option value="fiction">Fiction</option>
+                            <option value="science">Science</option>
+                            <option value="history">History</option>
+                            <option value="biography">Biography</option>
+                        </select>
+                        <select class="filter-select" onchange="filterBooks('availability', this.value)">
+                            <option value="">All Books</option>
+                            <option value="available">Available</option>
+                            <option value="borrowed">Borrowed</option>
+                        </select>
+                        <select class="filter-select" onchange="filterBooks('sort', this.value)">
+                            <option value="popularity">Most Popular</option>
+                            <option value="newest">Recently Added</option>
+                            <option value="rating">Highest Rated</option>
+                            <option value="title">Alphabetical</option>
+                        </select>
+                    </div>
+                    <div class="book-grid" id="bookBrowseGrid">
+                        <!-- Books will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-magic"></i>
+                        <span class="student-only">Recommended for You</span>
+                        <span class="librarian-only">Trending Books</span>
+                    </div>
+                </div>
+                <div class="card-content" style="padding: 0;">
+                    <div class="book-list" id="recommendationsList">
+                        <!-- Recommendations will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        // Global variables
+        let currentUser = {
+            id: {{ user.id }},
+            name: '{{ user.get_full_name|default:user.username }}',
+            role: '{% if user.is_staff %}librarian{% else %}student{% endif %}',
+            avatar: '{{ user.profile.avatar.url|default:"/static/images/default-avatar.png" }}'
+        };
+
+        let currentDate = new Date();
+        let notifications = [];
+        let wishlistSortable = null;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDashboard();
+        });
+
+        function initializeDashboard() {
+            // Set user role class on body
+            document.body.className = currentUser.role;
+            
+            // Update user info
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userAvatar').src = currentUser.avatar;
+            
+            // Load dashboard data
+            loadNotifications();
+            loadBorrowedBooks();
+            loadActivities();
+            loadRecommendations();
+            loadWishlist();
+            loadPopularBooks();
+            generateCalendar();
+            initializeCharts();
+            loadBrowseBooks();
+            
+            // Initialize drag and drop for wishlist
+            if (currentUser.role === 'student') {
+                initializeWishlistDragDrop();
+            }
+        }
+
+        // Notification Management
+        function loadNotifications() {
+            // Sample notifications - in real app, fetch from API
+            notifications = [
+                {
+                    id: 1,
+                    type: 'due_soon',
+                    title: 'Book Due Tomorrow',
+                    message: 'The Great Gatsby is due tomorrow',
+                    time: '2 hours ago',
+                    unread: true,
+                    icon: 'fas fa-clock',
+                    color: 'var(--warning)'
+                },
+                {
+                    id: 2,
+                    type: 'overdue',
+                    title: 'Overdue Book',
+                    message: '1984 is now overdue. Please return ASAP.',
+                    time: '1 day ago',
+                    unread: true,
+                    icon: 'fas fa-exclamation-triangle',
+                    color: 'var(--danger)'
+                },
+                {
+                    id: 3,
+                    type: 'recommendation',
+                    title: 'New Book Recommendation',
+                    message: 'Based on your reading history, you might like "Brave New World"',
+                    time: '2 days ago',
+                    unread: false,
+                    icon: 'fas fa-star',
+                    color: 'var(--info)'
+                },
+                {
+                    id: 4,
+                    type: 'wishlist_available',
+                    title: 'Wishlist Book Available',
+                    message: 'Animal Farm from your wishlist is now available!',
+                    time: '3 days ago',
+                    unread: true,
+                    icon: 'fas fa-heart',
+                    color: 'var(--success)'
+                },
+                {
+                    id: 5,
+                    type: 'system',
+                    title: 'Library Hours Update',
+                    message: 'Extended hours during exam week: 7 AM - 11 PM',
+                    time: '1 week ago',
+                    unread: false,
+                    icon: 'fas fa-info-circle',
+                    color: 'var(--mint-green)'
+                }
+            ];
+
+            updateNotificationUI();
+        }
+
+        function updateNotificationUI() {
+            const unreadCount = notifications.filter(n => n.unread).length;
+            document.getElementById('notificationCount').textContent = unreadCount;
+            document.getElementById('notificationCount').style.display = unreadCount > 0 ? 'flex' : 'none';
+
+            const notificationList = document.getElementById('notificationList');
+            notificationList.innerHTML = notifications.map(notification => `
+                <div class="notification-item ${notification.unread ? 'unread' : ''}" 
+                     onclick="markAsRead(${notification.id})">
+                    <div class="notification-title">
+                        <i class="${notification.icon}" style="color: ${notification.color}; margin-right: 0.5rem;"></i>
+                        ${notification.title}
+                    </div>
+                    <div class="notification-message">${notification.message}</div>
+                    <div class="notification-time">${notification.time}</div>
+                </div>
+            `).join('');
+        }
+
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notificationDropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function markAsRead(notificationId) {
+            const notification = notifications.find(n => n.id === notificationId);
+            if (notification) {
+                notification.unread = false;
+                updateNotificationUI();
+            }
+        }
+
+        // Borrowed Books
+        function loadBorrowedBooks() {
+            const sampleBooks = [
+                {
+                    id: 1,
+                    title: 'The Great Gatsby',
+                    author: 'F. Scott Fitzgerald',
+                    cover: '/static/images/gatsby.jpg',
+                    borrowDate: '2024-10-15',
+                    dueDate: '2024-11-15',
+                    status: 'due_soon'
+                },
+                {
+                    id: 2,
+                    title: '1984',
+                    author: 'George Orwell',
+                    cover: '/static/images/1984.jpg',
+                    borrowDate: '2024-10-01',
+                    dueDate: '2024-11-01',
+                    status: 'overdue'
+                },
+                {
+                    id: 3,
+                    title: 'To Kill a Mockingbird',
+                    author: 'Harper Lee',
+                    cover: '/static/images/mockingbird.jpg',
+                    borrowDate: '2024-10-20',
+                    dueDate: '2024-11-20',
+                    status: 'safe'
+                }
+            ];
+
+            const booksList = document.getElementById('borrowedBooksList');
+            booksList.innerHTML = sampleBooks.map(book => {
+                const daysUntilDue = Math.ceil((new Date(book.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
+                let dueDateClass = 'safe';
+                let dueDateText = `${daysUntilDue} days left`;
+
+                if (daysUntilDue < 0) {
+                    dueDateClass = 'overdue';
+                    dueDateText = `${Math.abs(daysUntilDue)} days overdue`;
+                } else if (daysUntilDue <= 3) {
+                    dueDateClass = 'due-soon';
+                    dueDateText = daysUntilDue === 0 ? 'Due today' : `${daysUntilDue} days left`;
+                }
+
+                return `
+                    <div class="book-item" onclick="openBookDetails(${book.id})">
+                        <img src="${book.cover}" alt="${book.title}" class="book-cover">
+                        <div class="book-info">
+                            <div class="book-title">${book.title}</div>
+                            <div class="book-author">by ${book.author}</div>
+                            <div class="book-meta">
+                                <span class="due-date ${dueDateClass}">${dueDateText}</span>
+                                <span class="librarian-only">
+                                    <button class="quick-btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" 
+                                            onclick="event.stopPropagation(); extendDueDate(${book.id})">
+                                        <i class="fas fa-calendar-plus"></i> Extend
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                        <span class="librarian-only">
+                            <button class="quick-btn" style="padding: 0.5rem;" 
+                                    onclick="event.stopPropagation(); markAsReturned(${book.id})">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Activities
+        function loadActivities() {
+            const sampleActivities = [
+                {
+                    id: 1,
+                    type: 'borrow',
+                    title: 'Borrowed Book',
+                    description: 'You borrowed "The Great Gatsby"',
+                    time: '2 hours ago',
+                    icon: 'fas fa-book',
+                    color: 'var(--mint-green)'
+                },
+                {
+                    id: 2,
+                    type: 'return',
+                    title: 'Returned Book',
+                    description: 'You returned "Pride and Prejudice"',
+                    time: '1 day ago',
+                    icon: 'fas fa-undo',
+                    color: 'var(--success)'
+                },
+                {
+                    id: 3,
+                    type: 'wishlist',
+                    title: 'Added to Wishlist',
+                    description: 'Added "Animal Farm" to wishlist',
+                    time: '2 days ago',
+                    icon: 'fas fa-heart',
+                    color: 'var(--pink)'
+                },
+                {
+                    id: 4,
+                    type: 'review',
+                    title: 'Reviewed Book',
+                    description: 'You rated "The Catcher in the Rye" 4 stars',
+                    time: '3 days ago',
+                    icon: 'fas fa-star',
+                    color: 'var(--warning)'
+                }
+            ];
+
+            const activityFeed = document.getElementById('activityFeed');
+            activityFeed.innerHTML = sampleActivities.map(activity => `
+                <div class="activity-item">
+                    <div class="activity-icon" style="background: ${activity.color};">
+                        <i class="${activity.icon}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">${activity.title}</div>
+                        <div class="activity-description">${activity.description}</div>
+                        <div class="activity-time">${activity.time}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Wishlist Management
+        function loadWishlist() {
+            if (currentUser.role !== 'student') return;
+
+            const wishlistItems = [
+                { id: 1, title: 'Animal Farm', author: 'George Orwell', priority: 1 },
+                { id: 2, title: 'Brave New World', author: 'Aldous Huxley', priority: 2 },
+                { id: 3, title: 'Lord of the Flies', author: 'William Golding', priority: 3 },
+                { id: 4, title: 'The Handmaid\'s Tale', author: 'Margaret Atwood', priority: 4 },
+                { id: 5, title: 'Fahrenheit 451', author: 'Ray Bradbury', priority: 5 }
+            ];
+
+            const wishlistContainer = document.getElementById('wishlistContainer');
+            if (wishlistContainer) {
+                wishlistContainer.innerHTML = wishlistItems.map(item => `
+                    <div class="wishlist-item" data-id="${item.id}">
+                        <i class="fas fa-grip-vertical drag-handle"></i>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500; font-size: 0.875rem;">${item.title}</div>
+                            <div style="color: var(--gray-600); font-size: 0.75rem;">${item.author}</div>
+                        </div>
+                        <button class="quick-btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" 
+                                onclick="borrowFromWishlist(${item.id})">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function initializeWishlistDragDrop() {
+            const wishlistContainer = document.getElementById('wishlistContainer');
+            if (wishlistContainer) {
+                wishlistSortable = new Sortable(wishlistContainer, {
+                    handle: '.drag-handle',
+                    animation: 150,
+                    ghostClass: 'dragging',
+                    onEnd: function(evt) {
+                        showToast('Wishlist order updated!');
+                        // Here you would save the new order to the backend
+                        updateWishlistOrder();
+                    }
+                });
+            }
+        }
+
+        // Calendar
+        function generateCalendar() {
+            const calendarGrid = document.getElementById('calendarGrid');
+            const currentMonth = document.getElementById('currentMonth');
+            
+            const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                           'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            currentMonth.textContent = `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+
+            // Sample due dates
+            const dueDates = {
+                '15': 'due-soon',
+                '20': 'has-due',
+                '1': 'has-overdue'
+            };
+
+            const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+            let calendarHTML = '';
+            
+            // Add day headers
+            const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            dayHeaders.forEach(day => {
+                calendarHTML += `<div style="font-weight: 600; text-align: center; padding: 0.5rem;">${day}</div>`;
+            });
+
+            // Add calendar days
+            for (let i = 0; i < 42; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                
+                const isCurrentMonth = date.getMonth() === currentDate.getMonth();
+                const isToday = date.toDateString() === new Date().toDateString();
+                const dayNumber = date.getDate();
+                const hasDue = dueDates[dayNumber.toString()];
+
+                let classes = 'calendar-day';
+                if (isToday) classes += ' today';
+                if (hasDue) classes += ` ${hasDue}`;
+                if (!isCurrentMonth) classes += ' text-gray-400';
+
+                calendarHTML += `
+                    <div class="${classes}" onclick="viewDaySchedule('${date.toISOString()}')">
+                        ${dayNumber}
+                    </div>
+                `;
+            }
+
+            calendarGrid.innerHTML = calendarHTML;
+        }
+
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            generateCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            generateCalendar();
+        }
+
+        // Charts
+        function initializeCharts() {
+            if (currentUser.role === 'student') {
+                initializeReadingChart();
+            } else {
+                initializeLibraryChart();
+            }
+        }
+
+        function initializeReadingChart() {
+            const ctx = document.getElementById('readingChart');
+            if (!ctx) return;
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'Books Read',
+                        data: [2, 1, 3, 2, 4, 1, 2, 3, 1, 2, 1, 0],
+                        borderColor: 'var(--mint-green)',
+                        backgroundColor: 'var(--mint-green-bg)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Reading Goal',
+                        data: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                        borderColor: 'var(--gray-400)',
+                        borderDash: [5, 5],
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'var(--gray-200)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'var(--gray-200)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initializeLibraryChart() {
+            const ctx = document.getElementById('libraryChart');
+            if (!ctx) return;
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Books Borrowed',
+                        data: [12, 19, 15, 25, 22, 8, 5],
+                        backgroundColor: 'var(--mint-green)',
+                        borderRadius: 4
+                    }, {
+                        label: 'Books Returned',
+                        data: [8, 15, 12, 18, 20, 10, 7],
+                        backgroundColor: 'var(--info)',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'var(--gray-200)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Browse Books
+        function loadBrowseBooks() {
+            const sampleBooks = [
+                { id: 1, title: 'The Alchemist', author: 'Paulo Coelho', cover: '/static/images/alchemist.jpg', genre: 'fiction', available: true },
+                { id: 2, title: 'A Brief History of Time', author: 'Stephen Hawking', cover: '/static/images/hawking.jpg', genre: 'science', available: true },
+                { id: 3, title: 'Steve Jobs', author: 'Walter Isaacson', cover: '/static/images/jobs.jpg', genre: 'biography', available: false },
+                { id: 4, title: 'The Guns of August', author: 'Barbara Tuchman', cover: '/static/images/guns.jpg', genre: 'history', available: true },
+                { id: 5, title: 'Dune', author: 'Frank Herbert', cover: '/static/images/dune.jpg', genre: 'fiction', available: true },
+                { id: 6, title: 'Sapiens', author: 'Yuval Noah Harari', cover: '/static/images/sapiens.jpg', genre: 'history', available: true }
+            ];
+
+            const bookGrid = document.getElementById('bookBrowseGrid');
+            bookGrid.innerHTML = sampleBooks.map(book => `
+                <div class="book-card" onclick="openBookDetails(${book.id})">
+                    <img src="${book.cover}" alt="${book.title}" class="book-card-cover">
+                    <div class="book-card-info">
+                        <div class="book-card-title">${book.title}</div>
+                        <div class="book-card-author">${book.author}</div>
+                        ${book.available ? 
+                            '<div style="color: var(--success); font-size: 0.7rem; margin-top: 0.25rem;"><i class="fas fa-check-circle"></i> Available</div>' :
+                            '<div style="color: var(--danger); font-size: 0.7rem; margin-top: 0.25rem;"><i class="fas fa-times-circle"></i> Borrowed</div>'
+                        }
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Recommendations
+        function loadRecommendations() {
+            const sampleRecommendations = [
+                { id: 1, title: 'Animal Farm', author: 'George Orwell', cover: '/static/images/animal-farm.jpg', reason: 'Because you read 1984' },
+                { id: 2, title: 'Fahrenheit 451', author: 'Ray Bradbury', cover: '/static/images/fahrenheit.jpg', reason: 'Popular in your genre' },
+                { id: 3, title: 'Lord of the Flies', author: 'William Golding', cover: '/static/images/flies.jpg', reason: 'Trending this week' }
+            ];
+
+            const recommendationsList = document.getElementById('recommendationsList');
+            recommendationsList.innerHTML = sampleRecommendations.map(book => `
+                <div class="book-item" onclick="openBookDetails(${book.id})">
+                    <img src="${book.cover}" alt="${book.title}" class="book-cover">
+                    <div class="book-info">
+                        <div class="book-title">${book.title}</div>
+                        <div class="book-author">by ${book.author}</div>
+                        <div style="font-size: 0.75rem; color: var(--mint-green); margin-top: 0.25rem;">
+                            <i class="fas fa-magic"></i> ${book.reason}
+                        </div>
+                    </div>
+                    <button class="quick-btn" onclick="event.stopPropagation(); quickBorrow(${book.id})" 
+                            style="padding: 0.5rem;">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Popular Books (for librarians)
+        function loadPopularBooks() {
+            if (currentUser.role !== 'librarian') return;
+
+            const popularBooks = [
+                { id: 1, title: 'The Seven Husbands of Evelyn Hugo', author: 'Taylor Jenkins Reid', borrowCount: 15 },
+                { id: 2, title: 'Where the Crawdads Sing', author: 'Delia Owens', borrowCount: 12 },
+                { id: 3, title: 'The Silent Patient', author: 'Alex Michaelides', borrowCount: 10 }
+            ];
+
+            const popularBooksList = document.getElementById('popularBooksList');
+            if (popularBooksList) {
+                popularBooksList.innerHTML = popularBooks.map(book => `
+                    <div class="book-item" onclick="openBookDetails(${book.id})">
+                        <div class="book-info" style="margin-left: 1rem;">
+                            <div class="book-title">${book.title}</div>
+                            <div class="book-author">by ${book.author}</div>
+                            <div style="font-size: 0.75rem; color: var(--mint-green); margin-top: 0.25rem;">
+                                <i class="fas fa-fire"></i> ${book.borrowCount} borrows this week
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Event Handlers
+        function openQuickSearch() {
+            showToast('Opening search...');
+            // Implement search modal or redirect
+        }
+
+        function openProfile() {
+            window.location.href = '/profile/';
+        }
+
+        function openReports() {
+            showToast('Opening reports dashboard...');
+            // Implement reports functionality
+        }
+
+        function openBookDetails(bookId) {
+            showToast(`Opening book details for book ${bookId}`);
+            // Implement book details modal or page
+        }
+
+        function quickBorrow(bookId) {
+            showToast('Book borrowed successfully!');
+            // Implement quick borrow functionality
+        }
+
+        function borrowFromWishlist(itemId) {
+            showToast('Book borrowed from wishlist!');
+            // Implement borrow from wishlist
+        }
+
+        function extendDueDate(bookId) {
+            showToast('Due date extended by 7 days');
+            // Implement due date extension
+        }
+
+        function markAsReturned(bookId) {
+            showToast('Book marked as returned');
+            loadBorrowedBooks(); // Refresh the list
+        }
+
+        function filterBooks(filterType, value) {
+            showToast(`Filtering by ${filterType}: ${value || 'all'}`);
+            // Implement filtering logic
+        }
+
+        function updateWishlistOrder() {
+            // Save new wishlist order to backend
+            console.log('Updating wishlist order...');
+        }
+
+        function viewDaySchedule(date) {
+            showToast(`Viewing schedule for ${new Date(date).toDateString()}`);
+            // Implement day schedule view
+        }
+
+        function viewAllBorrowed() {
+            showToast('Opening complete borrowed books list...');
+            // Implement full list view
+        }
+
+        function viewAllActivities() {
+            showToast('Opening complete activity history...');
+            // Implement full activity list
+        }
+
+        // Toast Notifications
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toastMessage.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Close notifications when clicking outside
+        document.addEventListener('click', function(event) {
+            const notificationCenter = document.querySelector('.notification-center');
+            const notificationDropdown = document.getElementById('notificationDropdown');
+            
+            if (!notificationCenter.contains(event.target)) {
+                notificationDropdown.style.display = 'none';
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + K for quick search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                openQuickSearch();
+            }
+            
+            // Ctrl/Cmd + N for notifications
+            if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                e.preventDefault();
+                toggleNotifications();
+            }
+        });
+
+        // Auto-refresh data every 5 minutes
+        setInterval(() => {
+            loadNotifications();
+            if (document.visibilityState === 'visible') {
+                loadBorrowedBooks();
+                loadActivities();
+            }
+        }, 5 * 60 * 1000);
+    </script>
+</body>
+</html>

@@ -256,6 +256,7 @@ urlpatterns += [
 
 # Authentication URLs
 urlpatterns += [
+    path('accounts/profile/', views.profile_view, name='account_profile'),  # Default auth profile URL
     path('accounts/', include('django.contrib.auth.urls')),  # Django's built-in auth URLs
     path('signup/', views.signup_view, name='signup'),  # Signup URL at root level
 ]
@@ -263,7 +264,7 @@ urlpatterns += [
 # Profile URLs
 urlpatterns += [
     # Main profile views
-    path('profile/', views.profile_view, name='profile'),
+    path('profile/', views.profile_view, name='profile'),  # Main profile URL
     path('profile/edit/', views.update_profile, name='profile_edit'),
     path('profile/avatar/', views.update_avatar, name='profile_avatar'),
     path('profile/password/', views.change_password, name='profile_password'),

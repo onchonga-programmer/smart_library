@@ -4,7 +4,7 @@ from django.db import models
 """
 Books app models for the GreenLeaf Library System
 """
-from django.db import models
+from django.db import models, IntegrityError
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.urls import reverse
@@ -596,20 +596,38 @@ class UserProfile(models.Model):
         """Generate unique library card number"""
         if not self.library_card_number:
             prefix = 'LIB'
-            year = self.membership_date.year
-            # Get the last card number for this year
-            last_profile = UserProfile.objects.filter(
-                library_card_number__startswith=f'{prefix}{year}'
-            ).order_by('library_card_number').last()
+            year = timezone.now().year
+            max_attempts = 100  # Prevent infinite loop
+            attempt = 0
             
-            if last_profile:
-                last_number = int(last_profile.library_card_number[-4:])
-                new_number = last_number + 1
-            else:
-                new_number = 1
+            while attempt < max_attempts:
+                # Get the last card number for this year
+                last_profile = UserProfile.objects.filter(
+                    library_card_number__startswith=f'{prefix}{year}'
+                ).order_by('library_card_number').last()
+                
+                if last_profile:
+                    try:
+                        last_number = int(last_profile.library_card_number[-4:])
+                        new_number = last_number + 1
+                    except (ValueError, IndexError):
+                        new_number = 1
+                else:
+                    new_number = 1
+                
+                new_card_number = f'{prefix}{year}{new_number:04d}'
+                
+                # Check if this number is already taken
+                if not UserProfile.objects.filter(library_card_number=new_card_number).exists():
+                    self.library_card_number = new_card_number
+                    break
+                
+                attempt += 1
             
-            self.library_card_number = f'{prefix}{year}{new_number:04d}'
-            self.save()
+            if attempt >= max_attempts:
+                # If we couldn't generate a unique number, create a fallback
+                timestamp = int(timezone.now().timestamp())
+                self.library_card_number = f'{prefix}{year}{timestamp % 10000:04d}'
 
 
 class Genre(models.Model):
@@ -709,15 +727,29 @@ class BookReview(models.Model):
 def create_user_profile(sender, instance, created, **kwargs):
     """Create UserProfile when User is created"""
     if created:
-        profile = UserProfile.objects.create(
-            user=instance,
-            user_type='librarian' if instance.is_staff else 'student'
-        )
-        profile.generate_library_card_number()
+        max_attempts = 3
+        for attempt in range(max_attempts):
+            try:
+                profile = UserProfile.objects.create(
+                    user=instance,
+                    user_type='librarian' if instance.is_staff else 'student'
+                )
+                profile.generate_library_card_number()
+                profile.save()
+                break
+            except IntegrityError:
+                if attempt == max_attempts - 1:
+                    raise  # Re-raise the exception if all attempts failed
+                continue
 
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     """Save UserProfile when User is saved"""
     if hasattr(instance, 'profile'):
-        instance.profile.save()
+        try:
+            instance.profile.save()
+        except IntegrityError:
+            if not instance.profile.library_card_number:
+                instance.profile.generate_library_card_number()
+                instance.profile.save()
