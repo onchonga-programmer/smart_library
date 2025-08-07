@@ -1,1 +1,1314 @@
-<h1>Book List</h1>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if category %}
+        {{ category|title }} Books - LibraryHub
+    {% else %}
+        All Books - LibraryHub
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <div class="header-content">
+            <h1 class="page-title">
+                {% if category %}
+                    {{ category|title }} Books
+                {% else %}
+                    All Books
+                {% endif %}
+            </h1>
+            <p class="page-subtitle">
+                {% if category %}
+                    Discover amazing {{ category }} books in our collection
+                {% else %}
+                    Browse our complete book collection
+                {% endif %}
+            </p>
+            
+            <!-- Breadcrumb Navigation -->
+            <nav class="breadcrumb">
+                <a href="{% url 'home' %}">Home</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="{% url 'books:book_list' %}">Books</a>
+                {% if category %}
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="current">{{ category|title }}</span>
+                {% endif %}
+            </nav>
+        </div>
+    </div>
+</section>
+
+<!-- Search and Filter Section -->
+<section class="search-filter-section">
+    <div class="container">
+        <!-- Search Bar -->
+        <div class="search-container">
+            <form class="search-form" method="GET" action="{% url 'books:search' %}">
+                <div class="search-input-group">
+                    <input type="text" 
+                           name="q" 
+                           class="search-input" 
+                           placeholder="Search books in this category..." 
+                           value="{{ request.GET.q }}"
+                           autocomplete="off">
+                    {% if category %}
+                        <input type="hidden" name="category" value="{{ category }}">
+                    {% endif %}
+                </div>
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search"></i>
+                    Search
+                </button>
+            </form>
+        </div>
+
+        <!-- Filter and Sort Controls -->
+        <div class="filter-controls">
+            <div class="filter-left">
+                <!-- Genre Filter -->
+                <div class="filter-group">
+                    <label for="genreFilter">Filter by Genre:</label>
+                    <select id="genreFilter" class="filter-select" onchange="filterByGenre(this.value)">
+                        <option value="">All Genres</option>
+                        <option value="fiction" {% if category == 'fiction' %}selected{% endif %}>Fiction</option>
+                        <option value="non-fiction" {% if category == 'non-fiction' %}selected{% endif %}>Non-Fiction</option>
+                        <option value="science" {% if category == 'science' %}selected{% endif %}>Science</option>
+                        <option value="history" {% if category == 'history' %}selected{% endif %}>History</option>
+                        <option value="mystery" {% if category == 'mystery' %}selected{% endif %}>Mystery</option>
+                        <option value="romance" {% if category == 'romance' %}selected{% endif %}>Romance</option>
+                        <option value="fantasy" {% if category == 'fantasy' %}selected{% endif %}>Fantasy</option>
+                    </select>
+                </div>
+
+                <!-- Availability Filter -->
+                <div class="filter-group">
+                    <label for="availabilityFilter">Availability:</label>
+                    <select id="availabilityFilter" class="filter-select" onchange="filterByAvailability(this.value)">
+                        <option value="">All Books</option>
+                        <option value="available">Available Now</option>
+                        <option value="ebook">E-books</option>
+                        <option value="audiobook">Audiobooks</option>
+                        <option value="reserved">Reserved</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="filter-right">
+                <!-- Sort Options -->
+                <div class="sort-group">
+                    <label for="sortBy">Sort by:</label>
+                    <select id="sortBy" class="sort-select" onchange="sortBooks(this.value)">
+                        <option value="title">Title A-Z</option>
+                        <option value="-title">Title Z-A</option>
+                        <option value="author">Author A-Z</option>
+                        <option value="-author">Author Z-A</option>
+                        <option value="-rating">Rating (High to Low)</option>
+                        <option value="rating">Rating (Low to High)</option>
+                        <option value="-date_added">Newest First</option>
+                        <option value="date_added">Oldest First</option>
+                    </select>
+                </div>
+
+                <!-- Results Count -->
+                <div class="results-count">
+                    <span>12 books found</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Librarian Add Book Button -->
+        {% if user.is_staff %}
+        <div class="librarian-controls">
+            <button class="btn btn-primary add-book-btn" onclick="openAddBookModal()">
+                <i class="fas fa-plus"></i>
+                Add New Book
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Books Grid Section -->
+<section class="books-listing-section">
+    <div class="container">
+        <!-- Fiction Books Section -->
+        <div class="genre-section" data-genre="fiction">
+            <div class="genre-header">
+                <h2 class="genre-title">
+                    <i class="fas fa-feather-alt"></i>
+                    Fiction
+                </h2>
+                <span class="genre-count">4 books</span>
+            </div>
+
+            <div class="books-grid">
+                <!-- The Great Gatsby -->
+                <div class="book-card" data-availability="available" data-rating="4.5">
+                    {% if user.is_staff %}
+                    <div class="librarian-actions">
+                        <button class="btn-remove" onclick="removeBook(1)" title="Remove Book">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <div class="book-cover">
+                        <img src="{% static 'books/images/image1.jpeg' %}" alt="The Great Gatsby Cover">
+                        <div class="book-overlay">
+                            <button class="btn-overlay" onclick="viewBook(1)" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            {% if not user.is_staff %}
+                        <div class="book-actions">
+                            <button class="btn btn-primary btn-sm" onclick="accessDigitalBook(8)">
+                                <i class="fas fa-play"></i>
+                                Access
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mystery Section -->
+        <div class="genre-section" data-genre="mystery">
+            <div class="genre-header">
+                <h2 class="genre-title">
+                    <i class="fas fa-search"></i>
+                    Mystery
+                </h2>
+                <span class="genre-count">2 books</span>
+            </div>
+
+            <div class="books-grid">
+                <!-- The Girl with the Dragon Tattoo -->
+                <div class="book-card" data-availability="available" data-rating="4.3">
+                    {% if user.is_staff %}
+                    <div class="librarian-actions">
+                        <button class="btn-remove" onclick="removeBook(9)" title="Remove Book">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <div class="book-cover">
+                        <img src="{% static 'books/images/image13.jpeg' %}" alt="The Girl with the Dragon Tattoo Cover">
+                        <div class="book-overlay">
+                            <button class="btn-overlay" onclick="viewBook(9)" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            {% if not user.is_staff %}
+                            <button class="btn-overlay" onclick="addToWishlist(9)" title="Add to Wishlist">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="book-info">
+                        <h3 class="book-title">The Girl with the Dragon Tattoo</h3>
+                        <p class="book-author">Stieg Larsson</p>
+                        
+                        <div class="book-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="rating-text">4.3 (2.1k reviews)</span>
+                        </div>
+
+                        <div class="book-status available">
+                            <i class="fas fa-check-circle"></i>
+                            Available
+                        </div>
+
+                        <div class="book-description">
+                            <button class="description-toggle" onclick="toggleDescription(this)">
+                                <i class="fas fa-chevron-down"></i>
+                                Description
+                            </button>
+                            <div class="description-content">
+                                <p>A gripping Swedish crime thriller featuring journalist Mikael Blomkvist and the enigmatic hacker Lisbeth Salander as they investigate a wealthy family's dark secrets and a decades-old disappearance.</p>
+                                <div class="book-meta">
+                                    <span><strong>ISBN:</strong> 978-0-307-45454-1</span>
+                                    <span><strong>Publisher:</strong> Vintage Crime</span>
+                                    <span><strong>Published:</strong> 2005</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if not user.is_staff %}
+                        <div class="book-actions">
+                            <button class="btn btn-primary btn-sm" onclick="borrowBook(9)">
+                                <i class="fas fa-book-reader"></i>
+                                Borrow
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Gone Girl -->
+                <div class="book-card" data-availability="audiobook" data-rating="4.0">
+                    {% if user.is_staff %}
+                    <div class="librarian-actions">
+                        <button class="btn-remove" onclick="removeBook(10)" title="Remove Book">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <div class="book-cover">
+                        <img src="{% static 'books/images/image14.jpeg' %}" alt="Gone Girl Cover">
+                        <div class="book-overlay">
+                            <button class="btn-overlay" onclick="viewBook(10)" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            {% if not user.is_staff %}
+                            <button class="btn-overlay" onclick="addToWishlist(10)" title="Add to Wishlist">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="book-info">
+                        <h3 class="book-title">Gone Girl</h3>
+                        <p class="book-author">Gillian Flynn</p>
+                        
+                        <div class="book-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                            <span class="rating-text">4.0 (1.8k reviews)</span>
+                        </div>
+
+                        <div class="book-status audiobook">
+                            <i class="fas fa-headphones"></i>
+                            Audiobook Available
+                        </div>
+
+                        <div class="book-description">
+                            <button class="description-toggle" onclick="toggleDescription(this)">
+                                <i class="fas fa-chevron-down"></i>
+                                Description
+                            </button>
+                            <div class="description-content">
+                                <p>A psychological thriller about Nick Dunne, whose wife Amy disappears on their fifth wedding anniversary. As the investigation unfolds, dark secrets about their marriage emerge in this twisted tale.</p>
+                                <div class="book-meta">
+                                    <span><strong>ISBN:</strong> 978-0-307-58836-4</span>
+                                    <span><strong>Publisher:</strong> Crown Publishing</span>
+                                    <span><strong>Published:</strong> 2012</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if not user.is_staff %}
+                        <div class="book-actions">
+                            <button class="btn btn-primary btn-sm" onclick="accessDigitalBook(10)">
+                                <i class="fas fa-play"></i>
+                                Access
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Section -->
+        <div class="genre-section" data-genre="history">
+            <div class="genre-header">
+                <h2 class="genre-title">
+                    <i class="fas fa-landmark"></i>
+                    History
+                </h2>
+                <span class="genre-count">2 books</span>
+            </div>
+
+            <div class="books-grid">
+                <!-- Sapiens -->
+                <div class="book-card" data-availability="available" data-rating="4.6">
+                    {% if user.is_staff %}
+                    <div class="librarian-actions">
+                        <button class="btn-remove" onclick="removeBook(11)" title="Remove Book">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <div class="book-cover">
+                        <img src="{% static 'books/images/image15.jpeg' %}" alt="Sapiens Cover">
+                        <div class="book-overlay">
+                            <button class="btn-overlay" onclick="viewBook(11)" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            {% if not user.is_staff %}
+                            <button class="btn-overlay" onclick="addToWishlist(11)" title="Add to Wishlist">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="book-info">
+                        <h3 class="book-title">Sapiens: A Brief History of Humankind</h3>
+                        <p class="book-author">Yuval Noah Harari</p>
+                        
+                        <div class="book-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="rating-text">4.6 (3.2k reviews)</span>
+                        </div>
+
+                        <div class="book-status available">
+                            <i class="fas fa-check-circle"></i>
+                            Available
+                        </div>
+
+                        <div class="book-description">
+                            <button class="description-toggle" onclick="toggleDescription(this)">
+                                <i class="fas fa-chevron-down"></i>
+                                Description
+                            </button>
+                            <div class="description-content">
+                                <p>A fascinating exploration of human history from the Stone Age to the present, examining how Homo sapiens came to dominate the world through cognitive, agricultural, and scientific revolutions.</p>
+                                <div class="book-meta">
+                                    <span><strong>ISBN:</strong> 978-0-062-31609-7</span>
+                                    <span><strong>Publisher:</strong> Harper</span>
+                                    <span><strong>Published:</strong> 2014</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if not user.is_staff %}
+                        <div class="book-actions">
+                            <button class="btn btn-primary btn-sm" onclick="borrowBook(11)">
+                                <i class="fas fa-book-reader"></i>
+                                Borrow
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- The Guns of August -->
+                <div class="book-card" data-availability="borrowed" data-rating="4.4">
+                    {% if user.is_staff %}
+                    <div class="librarian-actions">
+                        <button class="btn-remove" onclick="removeBook(12)" title="Remove Book">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <div class="book-cover">
+                        <img src="{% static 'books/images/image16.jpeg' %}" alt="The Guns of August Cover">
+                        <div class="book-overlay">
+                            <button class="btn-overlay" onclick="viewBook(12)" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            {% if not user.is_staff %}
+                            <button class="btn-overlay" onclick="addToWishlist(12)" title="Add to Wishlist">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="book-info">
+                        <h3 class="book-title">The Guns of August</h3>
+                        <p class="book-author">Barbara W. Tuchman</p>
+                        
+                        <div class="book-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="rating-text">4.4 (1.1k reviews)</span>
+                        </div>
+
+                        <div class="book-status borrowed">
+                            <i class="fas fa-clock"></i>
+                            Due Jan 22
+                        </div>
+
+                        <div class="book-description">
+                            <button class="description-toggle" onclick="toggleDescription(this)">
+                                <i class="fas fa-chevron-down"></i>
+                                Description
+                            </button>
+                            <div class="description-content">
+                                <p>A masterful account of the first month of World War I, chronicling the events that led to the Great War and the military campaigns that shaped the conflict's early stages. Winner of the Pulitzer Prize.</p>
+                                <div class="book-meta">
+                                    <span><strong>ISBN:</strong> 978-0-345-47609-8</span>
+                                    <span><strong>Publisher:</strong> Ballantine Books</span>
+                                    <span><strong>Published:</strong> 1962</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if not user.is_staff %}
+                        <div class="book-actions">
+                            <button class="btn btn-secondary btn-sm" onclick="reserveBook(12)">
+                                <i class="fas fa-bookmark"></i>
+                                Reserve
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+                    </div>
+                </div>
+                    </div>
+
+                    <div class="book-info">
+                        <h3 class="book-title">The Great Gatsby</h3>
+                        <p class="book-author">F. Scott Fitzgerald</p>
+                        
+                        <div class="book-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="rating-text">4.5 (234 reviews)</span>
+                        </div>
+
+                        <div class="book-status available">
+                            <i class="fas fa-check-circle"></i>
+                            Available
+                        </div>
+
+                        <div class="book-description">
+                            <button class="description-toggle" onclick="toggleDescription(this)">
+                                <i class="fas fa-chevron-down"></i>
+                                Description
+                            </button>
+                            <div class="description-content">
+                                <p>A classic American novel set in the Jazz Age that explores themes of wealth, love, idealism, and the American Dream through the eyes of narrator Nick Carraway.</p>
+                                <div class="book-meta">
+                                    <span><strong>ISBN:</strong> 978-0-7432-7356-5</span>
+                                    <span><strong>Publisher:</strong> Scribner</span>
+                                    <span><strong>Published:</strong> 1925</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if not user.is_staff %}
+                        <div class="book-actions">
+                            <button class="btn btn-primary btn-sm" onclick="borrowBook(1)">
+                                <i class="fas fa-book-reader"></i>
+                                Borrow
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- To Kill a Mockingbird -->
+                <div class="book-card" data-availability="borrowed" data-rating="4.8">
+                    {% if user.is_staff %}
+                    <div class="librarian-actions">
+                        <button class="btn-remove" onclick="removeBook(2)" title="Remove Book">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <div class="book-cover">
+                        <img src="{% static 'books/images/image2.jpeg' %}" alt="To Kill a Mockingbird Cover">
+                        <div class="book-overlay">
+                            <button class="btn-overlay" onclick="viewBook(2)" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            {% if not user.is_staff %}
+                            <button class="btn-overlay" onclick="addToWishlist(2)" title="Add to Wishlist">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="book-info">
+                        <h3 class="book-title">To Kill a Mockingbird</h3>
+                        <p class="book-author">Harper Lee</p>
+                        
+                        <div class="book-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="rating-text">4.8 (456 reviews)</span>
+                        </div>
+
+                        <div class="book-status borrowed">
+                            <i class="fas fa-clock"></i>
+                            Due Jan 15
+                        </div>
+
+                        <div class="book-description">
+                            <button class="description-toggle" onclick="toggleDescription(this)">
+                                <i class="fas fa-chevron-down"></i>
+                                Description
+                            </button>
+                            <div class="description-content">
+                                <p>A gripping tale of racial injustice and childhood innocence set in the American South, told through the eyes of Scout Finch as her father defends a black man falsely accused of rape.</p>
+                                <div class="book-meta">
+                                    <span><strong>ISBN:</strong> 978-0-06-112008-4</span>
+                                    <span><strong>Publisher:</strong> Harper Perennial</span>
+                                    <span><strong>Published:</strong> 1960</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if not user.is_staff %}
+                        <div class="book-actions">
+                            <button class="btn btn-secondary btn-sm" onclick="reserveBook(2)">
+                                <i class="fas fa-bookmark"></i>
+                                Reserve
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- 1984 -->
+                <div class="book-card" data-availability="ebook" data-rating="4.7">
+                    {% if user.is_staff %}
+                    <div class="librarian-actions">
+                        <button class="btn-remove" onclick="removeBook(3)" title="Remove Book">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <div class="book-cover">
+                        <img src="{% static 'books/images/image3.jpeg' %}" alt="1984 Cover">
+                        <div class="book-overlay">
+                            <button class="btn-overlay" onclick="viewBook(3)" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            {% if not user.is_staff %}
+                            <button class="btn-overlay" onclick="addToWishlist(3)" title="Add to Wishlist">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="book-info">
+                        <h3 class="book-title">1984</h3>
+                        <p class="book-author">George Orwell</p>
+                        
+                        <div class="book-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="rating-text">4.7 (789 reviews)</span>
+                        </div>
+
+                        <div class="book-status ebook">
+                            <i class="fas fa-tablet-alt"></i>
+                            E-book Available
+                        </div>
+
+                        <div class="book-description">
+                            <button class="description-toggle" onclick="toggleDescription(this)">
+                                <i class="fas fa-chevron-down"></i>
+                                Description
+                            </button>
+                            <div class="description-content">
+                                <p>A dystopian masterpiece depicting a totalitarian future where Big Brother watches everything and thoughtcrime is the worst offense. Winston Smith's struggle for truth and freedom in Oceania.</p>
+                                <div class="book-meta">
+                                    <span><strong>ISBN:</strong> 978-0-452-28423-4</span>
+                                    <span><strong>Publisher:</strong> Plume Books</span>
+                                    <span><strong>Published:</strong> 1949</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if not user.is_staff %}
+                        <div class="book-actions">
+                            <button class="btn btn-primary btn-sm" onclick="accessDigitalBook(3)">
+                                <i class="fas fa-play"></i>
+                                Access
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Pride and Prejudice -->
+                <div class="book-card" data-availability="reserved" data-rating="4.2">
+                    {% if user.is_staff %}
+                    <div class="librarian-actions">
+                        <button class="btn-remove" onclick="removeBook(4)" title="Remove Book">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <div class="book-cover">
+                        <img src="{% static 'books/images/image4.jpeg' %}" alt="Pride and Prejudice Cover">
+                        <div class="book-overlay">
+                            <button class="btn-overlay" onclick="viewBook(4)" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            {% if not user.is_staff %}
+                            <button class="btn-overlay" onclick="addToWishlist(4)" title="Add to Wishlist">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="book-info">
+                        <h3 class="book-title">Pride and Prejudice</h3>
+                        <p class="book-author">Jane Austen</p>
+                        
+                        <div class="book-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                            <span class="rating-text">4.2 (345 reviews)</span>
+                        </div>
+
+                        <div class="book-status reserved">
+                            <i class="fas fa-bookmark"></i>
+                            Reserved
+                        </div>
+
+                        <div class="book-description">
+                            <button class="description-toggle" onclick="toggleDescription(this)">
+                                <i class="fas fa-chevron-down"></i>
+                                Description
+                            </button>
+                            <div class="description-content">
+                                <p>A romantic novel following the relationship between Elizabeth Bennet and the proud Mr. Darcy, exploring themes of love, marriage, social class, and personal growth in Regency England.</p>
+                                <div class="book-meta">
+                                    <span><strong>ISBN:</strong> 978-0-14-143951-8</span>
+                                    <span><strong>Publisher:</strong> Penguin Classics</span>
+                                    <span><strong>Published:</strong> 1813</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if not user.is_staff %}
+                        <div class="book-actions">
+                            <button class="btn btn-secondary btn-sm" onclick="reserveBook(4)">
+                                <i class="fas fa-bookmark"></i>
+                                Reserve
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Science Fiction Section -->
+        <div class="genre-section" data-genre="science">
+            <div class="genre-header">
+                <h2 class="genre-title">
+                    <i class="fas fa-flask"></i>
+                    Science Fiction
+                </h2>
+                <span class="genre-count">4 books</span>
+            </div>
+
+            <div class="books-grid">
+                <!-- Dune -->
+                <div class="book-card" data-availability="available" data-rating="4.9">
+                    {% if user.is_staff %}
+                    <div class="librarian-actions">
+                        <button class="btn-remove" onclick="removeBook(5)" title="Remove Book">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <div class="book-cover">
+                        <img src="{% static 'books/images/image7.jpeg' %}" alt="Dune Cover">
+                        <div class="book-overlay">
+                            <button class="btn-overlay" onclick="viewBook(5)" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            {% if not user.is_staff %}
+                            <button class="btn-overlay" onclick="addToWishlist(5)" title="Add to Wishlist">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="book-info">
+                        <h3 class="book-title">Dune</h3>
+                        <p class="book-author">Frank Herbert</p>
+                        
+                        <div class="book-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="rating-text">4.9 (1.2k reviews)</span>
+                        </div>
+
+                        <div class="book-status available">
+                            <i class="fas fa-check-circle"></i>
+                            Available
+                        </div>
+
+                        <div class="book-description">
+                            <button class="description-toggle" onclick="toggleDescription(this)">
+                                <i class="fas fa-chevron-down"></i>
+                                Description
+                            </button>
+                            <div class="description-content">
+                                <p>Epic science fiction saga set on the desert planet Arrakis, following Paul Atreides as he navigates political intrigue, mystical powers, and the control of the universe's most valuable substance - spice.</p>
+                                <div class="book-meta">
+                                    <span><strong>ISBN:</strong> 978-0-441-17271-9</span>
+                                    <span><strong>Publisher:</strong> Ace Books</span>
+                                    <span><strong>Published:</strong> 1965</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if not user.is_staff %}
+                        <div class="book-actions">
+                            <button class="btn btn-primary btn-sm" onclick="borrowBook(5)">
+                                <i class="fas fa-book-reader"></i>
+                                Borrow
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- The Martian -->
+                <div class="book-card" data-availability="audiobook" data-rating="4.6">
+                    {% if user.is_staff %}
+                    <div class="librarian-actions">
+                        <button class="btn-remove" onclick="removeBook(6)" title="Remove Book">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <div class="book-cover">
+                        <img src="{% static 'books/images/image8.jpeg' %}" alt="The Martian Cover">
+                        <div class="book-overlay">
+                            <button class="btn-overlay" onclick="viewBook(6)" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            {% if not user.is_staff %}
+                            <button class="btn-overlay" onclick="addToWishlist(6)" title="Add to Wishlist">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="book-info">
+                        <h3 class="book-title">The Martian</h3>
+                        <p class="book-author">Andy Weir</p>
+                        
+                        <div class="book-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="rating-text">4.6 (890 reviews)</span>
+                        </div>
+
+                        <div class="book-status audiobook">
+                            <i class="fas fa-headphones"></i>
+                            Audiobook Available
+                        </div>
+
+                        <div class="book-description">
+                            <button class="description-toggle" onclick="toggleDescription(this)">
+                                <i class="fas fa-chevron-down"></i>
+                                Description
+                            </button>
+                            <div class="description-content">
+                                <p>A thrilling survival story of astronaut Mark Watney who becomes stranded on Mars and must use his ingenuity and scientific knowledge to survive until rescue, combining humor with hard science.</p>
+                                <div class="book-meta">
+                                    <span><strong>ISBN:</strong> 978-0-553-41802-6</span>
+                                    <span><strong>Publisher:</strong> Del Rey Books</span>
+                                    <span><strong>Published:</strong> 2011</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if not user.is_staff %}
+                        <div class="book-actions">
+                            <button class="btn btn-primary btn-sm" onclick="accessDigitalBook(6)">
+                                <i class="fas fa-play"></i>
+                                Access
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Foundation -->
+                <div class="book-card" data-availability="available" data-rating="4.8">
+                    {% if user.is_staff %}
+                    <div class="librarian-actions">
+                        <button class="btn-remove" onclick="removeBook(7)" title="Remove Book">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <div class="book-cover">
+                        <img src="{% static 'books/images/image10.jpeg' %}" alt="Foundation Cover">
+                        <div class="book-overlay">
+                            <button class="btn-overlay" onclick="viewBook(7)" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            {% if not user.is_staff %}
+                            <button class="btn-overlay" onclick="addToWishlist(7)" title="Add to Wishlist">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="book-info">
+                        <h3 class="book-title">Foundation</h3>
+                        <p class="book-author">Isaac Asimov</p>
+                        
+                        <div class="book-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="rating-text">4.8 (1.5k reviews)</span>
+                        </div>
+
+                        <div class="book-status available">
+                            <i class="fas fa-check-circle"></i>
+                            Available
+                        </div>
+
+                        <div class="book-description">
+                            <button class="description-toggle" onclick="toggleDescription(this)">
+                                <i class="fas fa-chevron-down"></i>
+                                Description
+                            </button>
+                            <div class="description-content">
+                                <p>The first book in Asimov's legendary Foundation series, following mathematician Hari Seldon's plan to preserve knowledge and shorten the coming dark age through the science of psychohistory.</p>
+                                <div class="book-meta">
+                                    <span><strong>ISBN:</strong> 978-0-553-29335-0</span>
+                                    <span><strong>Publisher:</strong> Spectra Books</span>
+                                    <span><strong>Published:</strong> 1951</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if not user.is_staff %}
+                        <div class="book-actions">
+                            <button class="btn btn-primary btn-sm" onclick="borrowBook(7)">
+                                <i class="fas fa-book-reader"></i>
+                                Borrow
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Neuromancer -->
+                <div class="book-card" data-availability="ebook" data-rating="4.1">
+                    {% if user.is_staff %}
+                    <div class="librarian-actions">
+                        <button class="btn-remove" onclick="removeBook(8)" title="Remove Book">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <div class="book-cover">
+                        <img src="{% static 'books/images/image9.jpeg' %}" alt="Neuromancer Cover">
+                        <div class="book-overlay">
+                            <button class="btn-overlay" onclick="viewBook(8)" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            {% if not user.is_staff %}
+                            <button class="btn-overlay" onclick="addToWishlist(8)" title="Add to Wishlist">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="book-info">
+                        <h3 class="book-title">Neuromancer</h3>
+                        <p class="book-author">William Gibson</p>
+                        
+                        <div class="book-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                            <span class="rating-text">4.1 (567 reviews)</span>
+                        </div>
+
+                        <div class="book-status ebook">
+                            <i class="fas fa-tablet-alt"></i>
+                            E-book Available
+                        </div>
+
+                        <div class="book-description">
+                            <button class="description-toggle" onclick="toggleDescription(this)">
+                                <i class="fas fa-chevron-down"></i>
+                                Description
+                            </button>
+                            <div class="description-content">
+                                <p>The groundbreaking cyberpunk novel that defined a genre, following hacker Case as he's hired for the ultimate hack in cyberspace. A dark, tech-noir vision of the future and artificial intelligence.</p>
+                                <div class="book-meta">
+                                    <span><strong>ISBN:</strong> 978-0-441-56956-9</span>
+                                    <span><strong>Publisher:</strong> Ace Books</span>
+                                    <span><strong>Published:</strong> 1984</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Pagination Section -->
+<section class="pagination-section">
+    <div class="container">
+        <div class="pagination-wrapper">
+            <div class="pagination-info">
+                <span class="current-page">Page 1 of 1</span>
+                <span class="total-results">(12 total books)</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Add Book Modal (Librarians Only) -->
+{% if user.is_staff %}
+<div class="modal" id="addBookModal">
+    <div class="modal-content large">
+        <div class="modal-header">
+            <h3><i class="fas fa-plus"></i> Add New Book</h3>
+            <button class="modal-close" onclick="closeModal('addBookModal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="addBookForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="bookTitle">Title *</label>
+                        <input type="text" id="bookTitle" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bookAuthor">Author *</label>
+                        <input type="text" id="bookAuthor" name="author" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="bookISBN">ISBN</label>
+                        <input type="text" id="bookISBN" name="isbn">
+                    </div>
+                    <div class="form-group">
+                        <label for="bookGenre">Genre *</label>
+                        <select id="bookGenre" name="genre" required>
+                            <option value="">Select Genre</option>
+                            <option value="fiction">Fiction</option>
+                            <option value="non-fiction">Non-Fiction</option>
+                            <option value="science">Science</option>
+                            <option value="history">History</option>
+                            <option value="mystery">Mystery</option>
+                            <option value="romance">Romance</option>
+                            <option value="fantasy">Fantasy</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="bookPublisher">Publisher</label>
+                        <input type="text" id="bookPublisher" name="publisher">
+                    </div>
+                    <div class="form-group">
+                        <label for="bookPublicationDate">Publication Date</label>
+                        <input type="date" id="bookPublicationDate" name="publication_date">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="bookDescription">Description</label>
+                    <textarea id="bookDescription" name="description" rows="4" placeholder="Brief description of the book..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="bookCover">Book Cover</label>
+                        <input type="file" id="bookCover" name="cover_image" accept="image/*">
+                    </div>
+                    <div class="form-group">
+                        <label for="bookAvailability">Availability *</label>
+                        <select id="bookAvailability" name="availability" required>
+                            <option value="available">Available</option>
+                            <option value="ebook">E-book</option>
+                            <option value="audiobook">Audiobook</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addBookModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Add Book
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- JavaScript -->
+<script>
+// Filter and Sort Functions
+function filterByGenre(genre) {
+    if (genre === '') {
+        window.location.href = '{% url "books:book_list" %}';
+    } else {
+        window.location.href = '/books/category/' + genre + '/';
+    }
+}
+
+function filterByAvailability(availability) {
+    // Hide/show books based on availability
+    const bookCards = document.querySelectorAll('.book-card');
+    bookCards.forEach(card => {
+        if (availability === '' || card.dataset.availability === availability) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    updateResultsCount();
+}
+
+function sortBooks(sortBy) {
+    // Implement client-side sorting or redirect with sort parameter
+    const currentUrl = new URL(window.location);
+    currentUrl.searchParams.set('sort', sortBy);
+    window.location.href = currentUrl.toString();
+}
+
+// Book Actions
+function viewBook(bookId) {
+    window.location.href = `/books/${bookId}/`;
+}
+
+function addToWishlist(bookId) {
+    // Implement wishlist functionality
+    fetch(`/books/${bookId}/wishlist/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Added to wishlist!', 'success');
+        }
+    });
+}
+
+function borrowBook(bookId) {
+    // Implement borrow functionality
+    fetch(`/books/${bookId}/borrow/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Book borrowed successfully!', 'success');
+            location.reload();
+        }
+    });
+}
+
+function reserveBook(bookId) {
+    // Implement reserve functionality
+    fetch(`/books/${bookId}/reserve/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Book reserved successfully!', 'success');
+            location.reload();
+        }
+    });
+}
+
+// Librarian Functions
+// Librarian Functions
+// Check if user is staff before defining functions
+if (typeof userIsStaff !== 'undefined' && userIsStaff) {
+    function removeBook(bookId) {
+        if (confirm('Are you sure you want to remove this book from the library?')) {
+            fetch(`/books/${bookId}/delete/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Book removed successfully!', 'success');
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error removing book:', error);
+                showNotification('Error removing book', 'error');
+            });
+        }
+    }
+
+    function openAddBookModal() {
+        document.getElementById('addBookModal').classList.add('active');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const addBookForm = document.getElementById('addBookForm');
+        if (addBookForm) {
+            addBookForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                fetch('/books/add/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification('Book added successfully!', 'success');
+                        closeModal('addBookModal');
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding book:', error);
+                    showNotification('Error adding book', 'error');
+                });
+            });
+        }
+    });
+}
+
+// Description Toggle
+function toggleDescription(button) {
+    const content = button.nextElementSibling;
+    const icon = button.querySelector('i');
+    
+    if (content.style.display === 'block') {
+        content.style.display = 'none';
+        icon.className = 'fas fa-chevron-down';
+    } else {
+        content.style.display = 'block';
+        icon.className = 'fas fa-chevron-up';
+    }
+}
+
+// Modal Functions
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+}
+
+// Utility Functions
+function updateResultsCount() {
+    const visibleBooks = document.querySelectorAll('.book-card[style="display: block"], .book-card:not([style])').length;
+    document.querySelector('.results-count span').textContent = `${visibleBooks} books found`;
+}
+
+function showNotification(message, type) {
+    // Implement notification system
+    alert(message); // Temporary - replace with proper notification
+}
+</script>
+{% endblock content %}
