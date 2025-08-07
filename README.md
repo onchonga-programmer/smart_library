@@ -260,16 +260,12 @@ python manage.py test
 4. Push to the branch (`git push origin feature/new-feature`)
 5. Create a Pull Request
 
-## 📝 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 📞 Support
 
 For support and questions:
 - Create an issue in the GitHub repository
-- Contact the development team
-- Check the documentation wiki
+
 
 ## 🏆 Acknowledgments
 
@@ -278,17 +274,6 @@ For support and questions:
 - Google Fonts for typography
 - Bootstrap inspiration for responsive design
 - Open source community for various tools and libraries
-
-## 📚 Documentation
-
-For detailed documentation on:
-- Model relationships
-- View functions
-- Template structure
-- URL patterns
-- Admin interface
-
-Visit the /docs/ directory or wiki pages
 
 ---
 
