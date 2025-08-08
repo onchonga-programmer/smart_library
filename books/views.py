@@ -28,6 +28,14 @@ from django.views.generic import (
     TemplateView, FormView
 )
 from django.views.decorators.http import require_POST
+
+class ReadingListView(LoginRequiredMixin, ListView):
+    template_name = 'books/user/readinglist.html'
+    context_object_name = 'reading_lists'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return ReadingList.objects.filter(user=self.request.user).prefetch_related('books')
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.db import transaction
@@ -758,7 +766,7 @@ def remove_from_wishlist(request, book_id):
 # ==================== READING LIST VIEWS ====================
 
 @login_required
-def reading_lists_view(request):
+def readinglist_view(request):
     """User's reading lists"""
     reading_lists = ReadingList.objects.filter(
         user=request.user

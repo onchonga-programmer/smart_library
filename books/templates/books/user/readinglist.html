@@ -1,0 +1,1428 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Reading List - LibraryHub{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <div class="header-content">
+            <h1 class="page-title">My Reading List</h1>
+            <p class="page-subtitle">Track your reading progress and discover new books</p>
+            
+            <!-- Breadcrumb Navigation -->
+            <nav class="breadcrumb">
+                <a href="{% url 'home' %}">Home</a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="current">My Reading List</span>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<!-- Reading Stats Section -->
+<section class="reading-stats-section">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>5</h3>
+                    <p>Currently Reading</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>23</h3>
+                    <p>Books Finished This Year</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>2</h3>
+                    <p>Due Soon</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>4.2</h3>
+                    <p>Average Rating</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Currently Reading Section -->
+<section class="current-reading-section">
+    <div class="container">
+        <!-- Physical Books Currently Borrowing -->
+        <div class="reading-category">
+            <div class="category-header">
+                <h2 class="category-title">
+                    <i class="fas fa-book"></i>
+                    Currently Borrowing
+                </h2>
+                <span class="category-count">3 books</span>
+            </div>
+
+            <div class="reading-books-grid">
+                <!-- The Great Gatsby -->
+                <div class="reading-book-card">
+                    <div class="book-cover-section">
+                        <img src="{% static 'books/images/image1.jpeg' %}" alt="The Great Gatsby Cover" class="book-cover-img">
+                        <div class="due-date-badge urgent">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Due in 2 days
+                        </div>
+                    </div>
+
+                    <div class="book-progress-section">
+                        <div class="book-header">
+                            <h3 class="book-title">The Great Gatsby</h3>
+                            <p class="book-author">F. Scott Fitzgerald</p>
+                        </div>
+
+                        <div class="progress-container">
+                            <div class="progress-header">
+                                <span class="progress-label">Reading Progress</span>
+                                <span class="progress-percentage">65%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 65%"></div>
+                            </div>
+                            <div class="progress-details">
+                                <span>Page 120 of 180</span>
+                                <span>Started: Dec 28, 2024</span>
+                            </div>
+                        </div>
+
+                        <div class="reading-actions">
+                            <button class="btn btn-primary btn-sm" onclick="updateProgress(1)">
+                                <i class="fas fa-bookmark"></i>
+                                Update Progress
+                            </button>
+                            <button class="btn btn-success btn-sm" onclick="markAsFinished(1)">
+                                <i class="fas fa-check"></i>
+                                Mark as Finished
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="renewBook(1)">
+                                <i class="fas fa-redo"></i>
+                                Renew
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- To Kill a Mockingbird -->
+                <div class="reading-book-card">
+                    <div class="book-cover-section">
+                        <img src="{% static 'books/images/image2.jpeg' %}" alt="To Kill a Mockingbird Cover" class="book-cover-img">
+                        <div class="due-date-badge normal">
+                            <i class="fas fa-calendar"></i>
+                            Due Jan 15
+                        </div>
+                    </div>
+
+                    <div class="book-progress-section">
+                        <div class="book-header">
+                            <h3 class="book-title">To Kill a Mockingbird</h3>
+                            <p class="book-author">Harper Lee</p>
+                        </div>
+
+                        <div class="progress-container">
+                            <div class="progress-header">
+                                <span class="progress-label">Reading Progress</span>
+                                <span class="progress-percentage">30%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 30%"></div>
+                            </div>
+                            <div class="progress-details">
+                                <span>Page 85 of 281</span>
+                                <span>Started: Jan 2, 2025</span>
+                            </div>
+                        </div>
+
+                        <div class="reading-actions">
+                            <button class="btn btn-primary btn-sm" onclick="updateProgress(2)">
+                                <i class="fas fa-bookmark"></i>
+                                Update Progress
+                            </button>
+                            <button class="btn btn-success btn-sm" onclick="markAsFinished(2)">
+                                <i class="fas fa-check"></i>
+                                Mark as Finished
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="renewBook(2)">
+                                <i class="fas fa-redo"></i>
+                                Renew
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dune -->
+                <div class="reading-book-card">
+                    <div class="book-cover-section">
+                        <img src="{% static 'books/images/image7.jpeg' %}" alt="Dune Cover" class="book-cover-img">
+                        <div class="due-date-badge normal">
+                            <i class="fas fa-calendar"></i>
+                            Due Jan 20
+                        </div>
+                    </div>
+
+                    <div class="book-progress-section">
+                        <div class="book-header">
+                            <h3 class="book-title">Dune</h3>
+                            <p class="book-author">Frank Herbert</p>
+                        </div>
+
+                        <div class="progress-container">
+                            <div class="progress-header">
+                                <span class="progress-label">Reading Progress</span>
+                                <span class="progress-percentage">12%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 12%"></div>
+                            </div>
+                            <div class="progress-details">
+                                <span>Page 75 of 608</span>
+                                <span>Started: Jan 5, 2025</span>
+                            </div>
+                        </div>
+
+                        <div class="reading-actions">
+                            <button class="btn btn-primary btn-sm" onclick="updateProgress(3)">
+                                <i class="fas fa-bookmark"></i>
+                                Update Progress
+                            </button>
+                            <button class="btn btn-success btn-sm" onclick="markAsFinished(3)">
+                                <i class="fas fa-check"></i>
+                                Mark as Finished
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="renewBook(3)">
+                                <i class="fas fa-redo"></i>
+                                Renew
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Digital Books in Progress -->
+        <div class="reading-category">
+            <div class="category-header">
+                <h2 class="category-title">
+                    <i class="fas fa-tablet-alt"></i>
+                    Digital Books in Progress
+                </h2>
+                <span class="category-count">2 books</span>
+            </div>
+
+            <div class="reading-books-grid">
+                <!-- 1984 E-book -->
+                <div class="reading-book-card digital">
+                    <div class="book-cover-section">
+                        <img src="{% static 'books/images/image3.jpeg' %}" alt="1984 Cover" class="book-cover-img">
+                        <div class="digital-badge ebook">
+                            <i class="fas fa-tablet-alt"></i>
+                            E-book
+                        </div>
+                    </div>
+
+                    <div class="book-progress-section">
+                        <div class="book-header">
+                            <h3 class="book-title">1984</h3>
+                            <p class="book-author">George Orwell</p>
+                        </div>
+
+                        <div class="progress-container">
+                            <div class="progress-header">
+                                <span class="progress-label">Reading Progress</span>
+                                <span class="progress-percentage">78%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 78%"></div>
+                            </div>
+                            <div class="progress-details">
+                                <span>Chapter 15 of 19</span>
+                                <span>Started: Dec 20, 2024</span>
+                            </div>
+                        </div>
+
+                        <div class="reading-actions">
+                            <button class="btn btn-primary btn-sm" onclick="continueReading(4)">
+                                <i class="fas fa-play"></i>
+                                Continue Reading
+                            </button>
+                            <button class="btn btn-success btn-sm" onclick="markAsFinished(4)">
+                                <i class="fas fa-check"></i>
+                                Mark as Finished
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- The Martian Audiobook -->
+                <div class="reading-book-card digital">
+                    <div class="book-cover-section">
+                        <img src="{% static 'books/images/image8.jpeg' %}" alt="The Martian Cover" class="book-cover-img">
+                        <div class="digital-badge audiobook">
+                            <i class="fas fa-headphones"></i>
+                            Audiobook
+                        </div>
+                    </div>
+
+                    <div class="book-progress-section">
+                        <div class="book-header">
+                            <h3 class="book-title">The Martian</h3>
+                            <p class="book-author">Andy Weir</p>
+                        </div>
+
+                        <div class="progress-container">
+                            <div class="progress-header">
+                                <span class="progress-label">Listening Progress</span>
+                                <span class="progress-percentage">45%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 45%"></div>
+                            </div>
+                            <div class="progress-details">
+                                <span>4h 32m of 10h 7m</span>
+                                <span>Started: Jan 1, 2025</span>
+                            </div>
+                        </div>
+
+                        <div class="reading-actions">
+                            <button class="btn btn-primary btn-sm" onclick="continueListening(5)">
+                                <i class="fas fa-play"></i>
+                                Continue Listening
+                            </button>
+                            <button class="btn btn-success btn-sm" onclick="markAsFinished(5)">
+                                <i class="fas fa-check"></i>
+                                Mark as Finished
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recently Finished Section -->
+        <div class="reading-category">
+            <div class="category-header">
+                <h2 class="category-title">
+                    <i class="fas fa-check-circle"></i>
+                    Recently Finished
+                </h2>
+                <span class="category-count">3 books</span>
+            </div>
+
+            <div class="finished-books-grid">
+                <!-- Pride and Prejudice -->
+                <div class="finished-book-card">
+                    <img src="{% static 'books/images/image4.jpeg' %}" alt="Pride and Prejudice Cover" class="finished-book-cover">
+                    <div class="finished-book-info">
+                        <h4 class="finished-book-title">Pride and Prejudice</h4>
+                        <p class="finished-book-author">Jane Austen</p>
+                        <div class="finished-date">Finished: Dec 25, 2024</div>
+                        
+                        <div class="book-rating">
+                            <span class="rating-label">Your Rating:</span>
+                            <div class="stars">
+                                <i class="fas fa-star rated"></i>
+                                <i class="fas fa-star rated"></i>
+                                <i class="fas fa-star rated"></i>
+                                <i class="fas fa-star rated"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                            <span class="rating-value">4.0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Foundation -->
+                <div class="finished-book-card">
+                    <img src="{% static 'books/images/image10.jpeg' %}" alt="Foundation Cover" class="finished-book-cover">
+                    <div class="finished-book-info">
+                        <h4 class="finished-book-title">Foundation</h4>
+                        <p class="finished-book-author">Isaac Asimov</p>
+                        <div class="finished-date">Finished: Dec 18, 2024</div>
+                        
+                        <div class="book-rating">
+                            <span class="rating-label">Your Rating:</span>
+                            <div class="stars">
+                                <i class="fas fa-star rated"></i>
+                                <i class="fas fa-star rated"></i>
+                                <i class="fas fa-star rated"></i>
+                                <i class="fas fa-star rated"></i>
+                                <i class="fas fa-star rated"></i>
+                            </div>
+                            <span class="rating-value">5.0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Neuromancer -->
+                <div class="finished-book-card">
+                    <img src="{% static 'books/images/image9.jpeg' %}" alt="Neuromancer Cover" class="finished-book-cover">
+                    <div class="finished-book-info">
+                        <h4 class="finished-book-title">Neuromancer</h4>
+                        <p class="finished-book-author">William Gibson</p>
+                        <div class="finished-date">Finished: Dec 10, 2024</div>
+                        
+                        <div class="book-rating">
+                            <span class="rating-label">Your Rating:</span>
+                            <div class="stars">
+                                <i class="fas fa-star rated"></i>
+                                <i class="fas fa-star rated"></i>
+                                <i class="fas fa-star rated"></i>
+                                <i class="fas fa-star rated"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                            <span class="rating-value">4.0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recommendations Section (shown when reading list is empty or as additional content) -->
+<section class="recommendations-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-magic"></i>
+                Recommended for You
+            </h2>
+            <p class="section-subtitle">Based on your reading history and preferences</p>
+        </div>
+
+        <div class="recommendations-grid">
+            <!-- Recommendation cards would go here, similar to book cards from the main listing -->
+            <div class="recommendation-card">
+                <img src="{% static 'books/images/image5.jpeg' %}" alt="Recommended Book" class="rec-book-cover">
+                <div class="rec-book-info">
+                    <h4 class="rec-book-title">The Handmaid's Tale</h4>
+                    <p class="rec-book-author">Margaret Atwood</p>
+                    <div class="rec-reason">Recommended because you enjoyed 1984</div>
+                    <button class="btn btn-primary btn-sm" onclick="borrowBook(9)">
+                        <i class="fas fa-book-reader"></i>
+                        Borrow
+                    </button>
+                </div>
+            </div>
+
+            <div class="recommendation-card">
+                <img src="{% static 'books/images/image6.jpeg' %}" alt="Recommended Book" class="rec-book-cover">
+                <div class="rec-book-info">
+                    <h4 class="rec-book-title">The Left Hand of Darkness</h4>
+                    <p class="rec-book-author">Ursula K. Le Guin</p>
+                    <div class="rec-reason">Perfect follow-up to Foundation series</div>
+                    <button class="btn btn-primary btn-sm" onclick="borrowBook(10)">
+                        <i class="fas fa-book-reader"></i>
+                        Borrow
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Empty State (hidden when user has books) -->
+<section class="empty-state-section" style="display: none;">
+    <div class="container">
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-book-open"></i>
+            </div>
+            <h2 class="empty-state-title">Your Reading List is Empty</h2>
+            <p class="empty-state-message">Start your reading journey by browsing our collection and borrowing your first book!</p>
+            <div class="empty-state-actions">
+                <a href="{% url 'books:book_list' %}" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                    Browse Books
+                </a>
+                <a href="{% url 'books:book_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-magic"></i>
+                    Get Recommendations
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modals -->
+<!-- Update Progress Modal -->
+<div id="updateProgressModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Update Reading Progress</h3>
+            <button class="modal-close" onclick="closeModal('updateProgressModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="updateProgressForm">
+                <div class="form-group">
+                    <label for="currentPage">Current Page:</label>
+                    <input type="number" id="currentPage" name="currentPage" min="1" required>
+                    <small class="form-help">Enter the page you're currently on</small>
+                </div>
+                <div class="form-group">
+                    <label for="readingNotes">Reading Notes (Optional):</label>
+                    <textarea id="readingNotes" name="readingNotes" rows="3" placeholder="Add any thoughts or notes about your reading..."></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('updateProgressModal')">Cancel</button>
+            <button type="submit" class="btn btn-primary" onclick="saveProgress()">Update Progress</button>
+        </div>
+    </div>
+</div>
+
+<!-- Mark as Finished Modal -->
+<div id="markFinishedModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Mark Book as Finished</h3>
+            <button class="modal-close" onclick="closeModal('markFinishedModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="markFinishedForm">
+                <div class="form-group">
+                    <label>Rate this book:</label>
+                    <div class="rating-input">
+                        <i class="far fa-star rating-star" data-rating="1"></i>
+                        <i class="far fa-star rating-star" data-rating="2"></i>
+                        <i class="far fa-star rating-star" data-rating="3"></i>
+                        <i class="far fa-star rating-star" data-rating="4"></i>
+                        <i class="far fa-star rating-star" data-rating="5"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="finishedReview">Write a Review (Optional):</label>
+                    <textarea id="finishedReview" name="finishedReview" rows="4" placeholder="Share your thoughts about this book..."></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('markFinishedModal')">Cancel</button>
+            <button type="submit" class="btn btn-success" onclick="finishBook()">Mark as Finished</button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Reading List Specific Styles */
+.reading-stats-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    color: white;
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+}
+
+.stat-content h3 {
+    font-size: 2.5rem;
+    margin: 0;
+    font-weight: bold;
+}
+
+.stat-content p {
+    margin: 0.5rem 0 0 0;
+    opacity: 0.9;
+}
+
+.current-reading-section {
+    padding: 2rem 0;
+}
+
+.reading-category {
+    margin-bottom: 3rem;
+}
+
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e0e6ed;
+}
+
+.category-title {
+    font-size: 1.8rem;
+    color: #2d3748;
+    margin: 0;
+}
+
+.category-title i {
+    margin-right: 0.5rem;
+    color: #667eea;
+}
+
+.category-count {
+    color: #718096;
+    font-size: 1rem;
+}
+
+.reading-books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.reading-book-card {
+    display: flex;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 220px;
+}
+
+.reading-book-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.reading-book-card.digital {
+    border-left: 4px solid #9f7aea;
+}
+
+.book-cover-section {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.book-cover-img {
+    width: 120px;
+    height: 100%;
+    object-fit: cover;
+}
+
+.due-date-badge, .digital-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: white;
+}
+
+.due-date-badge.urgent {
+    background: #e53e3e;
+    animation: pulse 2s infinite;
+}
+
+.due-date-badge.normal {
+    background: #38a169;
+}
+
+.digital-badge.ebook {
+    background: #805ad5;
+}
+
+.digital-badge.audiobook {
+    background: #dd6b20;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.book-progress-section {
+    flex: 1;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.book-header {
+    margin-bottom: 1rem;
+}
+
+.book-title {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.25rem;
+    color: #2d3748;
+}
+
+.book-author {
+    margin: 0;
+    color: #718096;
+    font-size: 0.9rem;
+}
+
+.progress-container {
+    flex: 1;
+    margin-bottom: 1rem;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.progress-label {
+    font-size: 0.9rem;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.progress-percentage {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.progress-details {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #718096;
+}
+
+.reading-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.reading-actions .btn {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+}
+
+.finished-books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.finished-book-card {
+    display: flex;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.finished-book-card:hover {
+    transform: translateY(-3px);
+}
+
+.finished-book-cover {
+    width: 80px;
+    height: 120px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.finished-book-info {
+    padding: 1rem;
+    flex: 1;
+}
+
+.finished-book-title {
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+    color: #2d3748;
+}
+
+.finished-book-author {
+    margin: 0 0 0.5rem 0;
+    color: #718096;
+    font-size: 0.85rem;
+}
+
+.finished-date {
+    font-size: 0.75rem;
+    color: #a0aec0;
+    margin-bottom: 0.75rem;
+}
+
+.book-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.rating-label {
+    font-size: 0.8rem;
+    color: #4a5568;
+}
+
+.stars {
+    display: flex;
+    gap: 2px;
+}
+
+.stars i {
+    color: #cbd5e0;
+    font-size: 0.9rem;
+}
+
+.stars i.rated {
+    color: #f6ad55;
+}
+
+.rating-value {
+    font-size: 0.85rem;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.recommendations-section {
+    background: #f7fafc;
+    padding: 3rem 0;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 2rem;
+    color: #2d3748;
+    margin: 0 0 0.5rem 0;
+}
+
+.section-title i {
+    margin-right: 0.5rem;
+    color: #667eea;
+}
+
+.section-subtitle {
+    color: #718096;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.recommendation-card {
+    display: flex;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.rec-book-cover {
+    width: 100px;
+    height: 150px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.rec-book-info {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.rec-book-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+    color: #2d3748;
+}
+
+.rec-book-author {
+    margin: 0 0 0.75rem 0;
+    color: #718096;
+    font-size: 0.95rem;
+}
+
+.rec-reason {
+    font-size: 0.85rem;
+    color: #805ad5;
+    background: #f7fafc;
+    padding: 0.5rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.empty-state-section {
+    padding: 4rem 0;
+    text-align: center;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    color: #cbd5e0;
+    margin-bottom: 1.5rem;
+}
+
+.empty-state-title {
+    font-size: 2rem;
+    color: #2d3748;
+    margin: 0 0 1rem 0;
+}
+
+.empty-state-message {
+    font-size: 1.1rem;
+    color: #718096;
+    margin: 0 0 2rem 0;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.empty-state-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.3s ease;
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #2d3748;
+    font-size: 1.5rem;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #a0aec0;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.modal-close:hover {
+    color: #e53e3e;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.form-group input, .form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-help {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.85rem;
+    color: #718096;
+}
+
+.rating-input {
+    display: flex;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+}
+
+.rating-star {
+    font-size: 1.5rem;
+    color: #cbd5e0;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.rating-star:hover,
+.rating-star.active {
+    color: #f6ad55;
+}
+
+/* Button Styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #5a67d8;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: #718096;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #4a5568;
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    background: #38a169;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #2f855a;
+    transform: translateY(-1px);
+}
+
+.btn-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(-50px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .reading-book-card {
+        flex-direction: column;
+        height: auto;
+    }
+    
+    .book-cover-img {
+        width: 100%;
+        height: 200px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .reading-books-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .recommendations-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .finished-books-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-content {
+        margin: 10% auto;
+        width: 95%;
+    }
+    
+    .empty-state-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .category-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .reading-actions {
+        flex-direction: column;
+    }
+    
+    .reading-actions .btn {
+        justify-content: center;
+    }
+}
+</style>
+
+<script>
+// JavaScript Functions for Reading List Functionality
+let currentBookId = null;
+let userRating = 0;
+
+// Update Progress Modal
+function updateProgress(bookId) {
+    currentBookId = bookId;
+    document.getElementById('updateProgressModal').style.display = 'block';
+}
+
+// Mark as Finished Modal
+function markAsFinished(bookId) {
+    currentBookId = bookId;
+    document.getElementById('markFinishedModal').style.display = 'block';
+}
+
+// Continue Reading/Listening
+function continueReading(bookId) {
+    // Redirect to e-book reader
+    window.location.href = `/books/${bookId}/read/`;
+}
+
+function continueListening(bookId) {
+    // Redirect to audiobook player
+    window.location.href = `/books/${bookId}/listen/`;
+}
+
+// Renew Book
+function renewBook(bookId) {
+    if (confirm('Would you like to renew this book for another 2 weeks?')) {
+        // AJAX call to renew book
+        console.log(`Renewing book ${bookId}`);
+        // Show success message
+        showMessage('Book renewed successfully! New due date: Jan 29, 2025', 'success');
+    }
+}
+
+// Modal Functions
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+    // Reset forms
+    if (modalId === 'updateProgressModal') {
+        document.getElementById('updateProgressForm').reset();
+    } else if (modalId === 'markFinishedModal') {
+        document.getElementById('markFinishedForm').reset();
+        resetRating();
+    }
+}
+
+// Save Progress
+function saveProgress() {
+    const currentPage = document.getElementById('currentPage').value;
+    const notes = document.getElementById('readingNotes').value;
+    
+    if (!currentPage) {
+        alert('Please enter the current page number.');
+        return;
+    }
+    
+    // AJAX call to save progress
+    console.log(`Saving progress for book ${currentBookId}: Page ${currentPage}`);
+    console.log(`Notes: ${notes}`);
+    
+    // Update UI
+    showMessage('Reading progress updated successfully!', 'success');
+    closeModal('updateProgressModal');
+    
+    // Refresh the page or update the progress bar
+    setTimeout(() => {
+        location.reload();
+    }, 1000);
+}
+
+// Rating System
+document.addEventListener('DOMContentLoaded', function() {
+    const ratingStars = document.querySelectorAll('.rating-star');
+    
+    ratingStars.forEach((star, index) => {
+        star.addEventListener('mouseenter', function() {
+            highlightStars(index + 1);
+        });
+        
+        star.addEventListener('click', function() {
+            userRating = index + 1;
+            setRating(userRating);
+        });
+    });
+    
+    // Reset on mouse leave
+    document.querySelector('.rating-input').addEventListener('mouseleave', function() {
+        setRating(userRating);
+    });
+});
+
+function highlightStars(rating) {
+    const stars = document.querySelectorAll('.rating-star');
+    stars.forEach((star, index) => {
+        if (index < rating) {
+            star.classList.remove('far');
+            star.classList.add('fas');
+            star.classList.add('active');
+        } else {
+            star.classList.remove('fas', 'active');
+            star.classList.add('far');
+        }
+    });
+}
+
+function setRating(rating) {
+    const stars = document.querySelectorAll('.rating-star');
+    stars.forEach((star, index) => {
+        if (index < rating) {
+            star.classList.remove('far');
+            star.classList.add('fas');
+            star.classList.add('active');
+        } else {
+            star.classList.remove('fas', 'active');
+            star.classList.add('far');
+        }
+    });
+}
+
+function resetRating() {
+    userRating = 0;
+    setRating(0);
+}
+
+// Finish Book
+function finishBook() {
+    const review = document.getElementById('finishedReview').value;
+    
+    if (userRating === 0) {
+        alert('Please rate the book before marking it as finished.');
+        return;
+    }
+    
+    // AJAX call to mark as finished
+    console.log(`Marking book ${currentBookId} as finished`);
+    console.log(`Rating: ${userRating} stars`);
+    console.log(`Review: ${review}`);
+    
+    // Update UI
+    showMessage(`Book marked as finished with ${userRating} stars!`, 'success');
+    closeModal('markFinishedModal');
+    
+    // Refresh the page
+    setTimeout(() => {
+        location.reload();
+    }, 1000);
+}
+
+// Utility Functions
+function showMessage(message, type = 'info') {
+    // Create and show a toast message
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+        <div class="toast-content">
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    // Add toast styles if not already present
+    if (!document.querySelector('.toast-styles')) {
+        const toastStyles = document.createElement('style');
+        toastStyles.className = 'toast-styles';
+        toastStyles.textContent = `
+            .toast {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                padding: 1rem 1.5rem;
+                z-index: 1001;
+                animation: slideInRight 0.3s ease;
+                border-left: 4px solid #667eea;
+            }
+            .toast-success { border-left-color: #38a169; }
+            .toast-content {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            .toast-success .fas { color: #38a169; }
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(toastStyles);
+    }
+    
+    document.body.appendChild(toast);
+    
+    // Remove toast after 3 seconds
+    setTimeout(() => {
+        toast.style.animation = 'slideInRight 0.3s ease reverse';
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 300);
+    }, 3000);
+}
+
+// Borrow Book from Recommendations
+function borrowBook(bookId) {
+    console.log(`Borrowing book ${bookId}`);
+    showMessage('Book added to your reading list!', 'success');
+}
+
+// Close modals when clicking outside
+window.onclick = function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+    }
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if reading list is empty and show/hide empty state
+    const hasBooks = document.querySelectorAll('.reading-book-card').length > 0;
+    
+    if (!hasBooks) {
+        document.querySelector('.current-reading-section').style.display = 'none';
+        document.querySelector('.empty-state-section').style.display = 'block';
+    }
+});
+</script>
+{% endblock %}

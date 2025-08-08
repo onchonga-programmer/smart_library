@@ -55,9 +55,9 @@ urlpatterns = [
     #path('my-borrows/', views.my_borrows_view, name='my_borrows'),
 
     # ==================== READING LIST URLS ====================
-    path('reading-lists/', views.reading_lists_view, name='reading_lists'),
-    path('reading-lists/create/', views.ReadingListCreateView.as_view(), name='reading_list_create'),
-    path('reading-lists/<int:list_id>/', views.reading_list_detail, name='reading_list_detail'),
+    path('readinglist/', views.readinglist_view, name='readinglist'),
+    path('readinglist/create/', views.ReadingListCreateView.as_view(), name='readinglist_create'),
+    path('readinglist/<int:list_id>/', views.reading_list_detail, name='readinglist_detail'),
     
     # ==================== SEARCH URLS ====================
     path('search/', views.BookListView.as_view(), name='search'),
@@ -66,7 +66,8 @@ urlpatterns = [
     
     # ==================== USER PROFILE URLS ====================
     path('profile/', views.user_profile, name='user_profile'),
-    
+    path('user/readinglist/', views.ReadingListView.as_view(), name='readinglist'),
+
     # ==================== NOTIFICATION URLS ====================
     path('notifications/', views.notifications_view, name='notifications'),
     path('notifications/mark-read/', views.mark_notification_read, name='mark_notification_read'),
