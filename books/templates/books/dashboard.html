@@ -1055,7 +1055,7 @@
             id: {{ user.id }},
             name: '{{ user.get_full_name|default:user.username }}',
             role: '{% if user.is_staff %}librarian{% else %}student{% endif %}',
-            avatar: '{{ user.profile.avatar.url|default:"/static/images/default-avatar.png" }}'
+            avatar: '{{ user.profile.avatar.url|default:"/static/books/images/avatar.jpeg" }}'
         };
 
         let currentDate = new Date();
@@ -1190,7 +1190,7 @@
                     id: 1,
                     title: 'The Great Gatsby',
                     author: 'F. Scott Fitzgerald',
-                    cover: '/static/images/gatsby.jpg',
+                    cover: '/static/books/images/image13.jpeg',
                     borrowDate: '2024-10-15',
                     dueDate: '2024-11-15',
                     status: 'due_soon'
@@ -1199,7 +1199,7 @@
                     id: 2,
                     title: '1984',
                     author: 'George Orwell',
-                    cover: '/static/images/1984.jpg',
+                    cover: '/static/books/images/image3.jpeg',
                     borrowDate: '2024-10-01',
                     dueDate: '2024-11-01',
                     status: 'overdue'
@@ -1208,7 +1208,7 @@
                     id: 3,
                     title: 'To Kill a Mockingbird',
                     author: 'Harper Lee',
-                    cover: '/static/images/mockingbird.jpg',
+                    cover: '/static/books/images/image2.jpeg',
                     borrowDate: '2024-10-20',
                     dueDate: '2024-11-20',
                     status: 'safe'
@@ -1557,9 +1557,9 @@
         // Recommendations
         function loadRecommendations() {
             const sampleRecommendations = [
-                { id: 1, title: 'Animal Farm', author: 'George Orwell', cover: '/static/images/animal-farm.jpg', reason: 'Because you read 1984' },
-                { id: 2, title: 'Fahrenheit 451', author: 'Ray Bradbury', cover: '/static/images/fahrenheit.jpg', reason: 'Popular in your genre' },
-                { id: 3, title: 'Lord of the Flies', author: 'William Golding', cover: '/static/images/flies.jpg', reason: 'Trending this week' }
+                { id: 1, title: 'Animal Farm', author: 'George Orwell', cover: '/static/books/images/animalfarm.jpeg', reason: 'Because you read 1984' },
+                { id: 2, title: 'Fahrenheit 451', author: 'Ray Bradbury', cover: '/static/books/images/fahrenheit.jpeg', reason: 'Popular in your genre' },
+                { id: 3, title: 'Lord of the Flies', author: 'William Golding', cover: '/static/books/images/image6.jpeg', reason: 'Trending this week' }
             ];
 
             const recommendationsList = document.getElementById('recommendationsList');

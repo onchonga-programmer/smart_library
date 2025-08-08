@@ -1428,26 +1428,48 @@ def profile_view(request):
     user = request.user
     profile = user.profile
     
-    # Get user statistics
-    current_borrowed = user.borrowrecord_set.filter(return_date__isnull=True).count()
-    total_borrowed = user.borrowrecord_set.count()
-    total_returned = user.borrowrecord_set.filter(return_date__isnull=False).count()
-    wishlist_count = user.wishlist.count()
+    # Get detailed borrowing statistics
+    borrow_records = user.borrow_records.all()
+    current_borrowed = borrow_records.filter(return_date__isnull=True).count()
+    total_borrowed = borrow_records.count()
+    total_returned = borrow_records.filter(return_date__isnull=False).count()
+    overdue_count = borrow_records.filter(
+        return_date__isnull=True,
+        due_date__lt=timezone.now().date()
+    ).count()
+    
+    # Calculate total fines
+    total_fines = borrow_records.aggregate(
+        total=models.Sum('late_fee')
+    )['total'] or 0
+    
+    # Get reading statistics for current year
+    current_year = timezone.now().year
+    books_this_year = borrow_records.filter(
+        borrow_date__year=current_year,
+        return_date__isnull=False
+    ).count()
     
     # Get recent activities (last 10)
-    recent_activities = user.activities.select_related('book')[:10]
+    recent_activities = UserActivity.objects.filter(user=user).select_related('book')[:10]
     
     # Get wishlist items (top 5 by priority)
-    wishlist_items = user.wishlist.select_related('book')[:5]
+    wishlist_items = user.wishlist.select_related('book').order_by('priority')[:5]
     
-    # Get overdue books if any
-    overdue_books = user.borrowrecord_set.filter(
+    # Get overdue books
+    overdue_books = borrow_records.filter(
         return_date__isnull=True,
         due_date__lt=timezone.now().date()
     ).select_related('book')
     
     context = {
         'profile': profile,
+        'current_borrowed': current_borrowed,
+        'total_borrowed': total_borrowed,
+        'total_returned': total_returned,
+        'overdue_count': overdue_count,
+        'total_fines': total_fines,
+        'books_this_year': books_this_year,
         'current_borrowed': current_borrowed,
         'total_borrowed': total_borrowed,
         'total_returned': total_returned,

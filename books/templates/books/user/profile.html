@@ -132,9 +132,10 @@
 
         .profile-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
             margin-top: 1.5rem;
+            padding: 1rem;
         }
 
         .stat-item {
@@ -506,19 +507,27 @@
             
             <div class="profile-stats">
                 <div class="stat-item">
-                    <div class="stat-number">{{ user.borrowed_books.count }}</div>
-                    <div class="stat-label">Books Borrowed</div>
+                    <div class="stat-number">{{ total_borrowed }}</div>
+                    <div class="stat-label">Total Books Borrowed</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number">{{ user.returned_books.count }}</div>
+                    <div class="stat-number">{{ total_returned }}</div>
                     <div class="stat-label">Books Returned</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number">{{ user.wishlist.count }}</div>
-                    <div class="stat-label">Wishlist Items</div>
+                    <div class="stat-number">{{ current_borrowed }}</div>
+                    <div class="stat-label">Currently Borrowed</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number">${{ user.total_fines|default:0 }}</div>
+                    <div class="stat-number">{{ books_this_year }}</div>
+                    <div class="stat-label">Books This Year</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ overdue_count }}</div>
+                    <div class="stat-label">Overdue Books</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">${{ total_fines|floatformat:2 }}</div>
                     <div class="stat-label">Total Fines</div>
                 </div>
             </div>
@@ -715,7 +724,7 @@
                     </div>
                     <div class="section-content">
                         <div class="wishlist-item">
-                            <img src="/static/images/book-1984.jpg" alt="1984" class="book-cover">
+                            <img src="/static/books/images/image3.jpeg" alt="1984" class="book-cover">
                             <div class="book-info">
                                 <div class="book-title">1984</div>
                                 <div class="book-author">George Orwell</div>
@@ -726,7 +735,7 @@
                         </div>
                         
                         <div class="wishlist-item">
-                            <img src="/static/images/book-brave-new-world.jpg" alt="Brave New World" class="book-cover">
+                            <img src="/static/books/images/image14.jpeg" alt="Brave New World" class="book-cover">
                             <div class="book-info">
                                 <div class="book-title">Brave New World</div>
                                 <div class="book-author">Aldous Huxley</div>
